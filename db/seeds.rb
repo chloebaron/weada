@@ -45,7 +45,7 @@ seven_day_cycle[0].each do |weather_condition|
   location: user_address,
   temperature: weather_condition["temperatureHigh"],
   apparent_temperature: weather_condition["apparentTemperatureHigh"],
-  cloud_cover: weather_condition["cloudCover"].to_f,
+  cloud_cover: weather_condition["cloudCovers"].to_f,
   wind_speed: weather_condition["windSpeed"].to_f,
   precip_probability: weather_condition["precipProbability"].to_f,
   precip_type: weather_condition["precipType"],
