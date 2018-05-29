@@ -10,4 +10,3 @@
 # User.create(email: "admin@admin.com", password: "testing", admin: true)
 # User.create(email: "user@user.com", password: "testing")
 
-Activity.create(name: "joggling", category: "Outdoor")
