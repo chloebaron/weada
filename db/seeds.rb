@@ -5,3 +5,9 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
+
+# If you have your own seed please comment blow
+# User.create(email: "admin@admin.com", password: "testing", admin: true)
+# User.create(email: "user@user.com", password: "testing")
+
+Activity.create(name: "joggling", category: "Outdoor")
