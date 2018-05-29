@@ -5,7 +5,10 @@ class UserEventsController < ApplicationController
   end
 
   def create
-    @user_event = UserEvent.new()
+    user_event_params[:activity_id].reject!(&:blank?).each do |activity|
+      @user_event = UserEvent.new(activity_id: activity, duration: )
+    end
+    authorize @user_event
   end
 
   private
