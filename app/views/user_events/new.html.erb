@@ -1,7 +1,16 @@
-<h2>You will have get_hours_by_analyzing_from_calendar</h2>
+<div class="container">
+  <div class="col-xs-12 col-sm-6 col-sm-offset-3">
+    <div class="card activities">
+      <h1>Choose your activities for the week!</h1>
+      <%= simple_form_for(@user_event) do |f| %>
+      <%= f.association :activities, as: :check_boxes %>
+      <%= f.input :duration, placeholder: "30, 60, 120 minutes" %>
+      <%= f.submit "Save", class: "btn btn-primary"  %>
+      <% end %>
+    </div>
+  </div>
+</div>
+</div>
 
-<%= simple_form_for @user_event do |f| %>
-<%= f.association :activity, as: :check_boxes %>
-<%= f.input :duration %>
-<%= f.submit "Submit" %>
-<% end %>
+
+
