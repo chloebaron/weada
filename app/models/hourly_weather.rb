@@ -1,4 +1,4 @@
-class WeatherCondition < ApplicationRecord
+class HourlyWeather < ApplicationRecord
   def sunny?
     cloud_cover <= 0.20
   end
