@@ -58,9 +58,9 @@ class CalendarsController < ApplicationController
     { start: busy.last[:end], end: _sleep  }
   end
 
-  def free_time_duration(availibilities)
-    availibilities.map { |availibility| ((availibility[:start] - availibility[:end]) * -24 * 60).to_f  }
-  end
+  # def free_time_duration(availibilities)
+  #   availibilities.map { |availibility| ((availibility[:start] - availibility[:end]) * -24 * 60).to_f  }
+  # end
 
   def seperate_busys_by_date(busys)
     day = DateTime.now.day
