@@ -21,6 +21,7 @@ User.create!(
   address: " 5333 Avenue Casgrain #102, Montréal, QC H2T 1X6".strip.gsub(/\s+/, " ").gsub(/(\(|\)|\#)/, "").unicode_normalize(:nfkd).encode('ASCII', replace: '')
   )
 
+
 # geo_url = "https://maps.googleapis.com/maps/api/geocode/json?address=Montreal,QC&key=#{ENV["GOOGLE_API_LEO"]}"
 # geo_json = open(geo_url).read
 # geocode = JSON.parse(geo_json)
@@ -43,4 +44,5 @@ User.create!(
 #   time: weather_condition["time"]
 #   )
 # end
+
 
