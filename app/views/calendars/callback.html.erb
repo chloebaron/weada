@@ -1,4 +1,8 @@
 <% @busys.each do |busy| %>
-<p> <%= busy[:start] %></p>
-<p> <%= busy[:end] %></p>
+  <% busy.each do |b| %>
+    <p> <%= b[:start] %></p>
+    <p> <%= b[:end] %></p>
+    <% end %>
 <% end %>
+
+

@@ -10,6 +10,7 @@ class UserEventsController < ApplicationController
 
   def determine
 
+    weather_conditions = { outdoor:   }
   end
 
   private
@@ -18,20 +19,26 @@ class UserEventsController < ApplicationController
     params.require(:user_event).permit(:duration, :activity_id)
   end
 
-  # def sunny?(precip_probability)
-  #   precipProbability >= 0.3
-  # end
+  def sunny?(precip_probability)
+    precipProbability >= 0.3
+  end
 
-  # def windy?(wind_speed)
-  #   wind_speed >= 15.0
-  # end
+  def windy?(wind_speed)
+    wind_speed >= 15.0
+  end
 
-  # def apparent_temp_nice?(apparent_temperature)
-  #   apparent_temperature >= 23.0
-  # end
+  def go_outdoors?(temperature)
+    if sunny?
+      itemperature <= 30 && apparent_temp_nice?
 
-  # def cloudy?(cloud_cover)
-  #   cloud_cover >= 0.5
-  # end
+  end
+
+  def apparent_temp_nice?(apparent_temperature)
+    apparent_temperature >= 23.0
+  end
+
+  def cloudy?(cloud_cover)
+    cloud_cover >= 0.5
+  end
 
 end
