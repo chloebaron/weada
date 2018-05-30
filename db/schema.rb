@@ -10,17 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_05_30_180629) do
+ActiveRecord::Schema.define(version: 2018_05_30_170210) do
+
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "activities", force: :cascade do |t|
     t.string "name"
-    t.string "category"
-    t.string "weather_condition"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "sunny_required"
+    t.boolean "warm_required"
+    t.boolean "dry_required"
+    t.boolean "calm_required"
   end
 
   create_table "hourly_weathers", force: :cascade do |t|
