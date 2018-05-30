@@ -1,0 +1,7 @@
+<h2>You will have get_hours_by_analyzing_from_calendar</h2>
+
+<%= simple_form_for @user_event do |f| %>
+<%= f.association :activity, as: :check_boxes %>
+<%= f.input :duration %>
+<%= f.submit "Submit" %>
+<% end %>

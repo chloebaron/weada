@@ -86,6 +86,7 @@ User.create!(
 }.values.each do |e|
  Activity.create(e)
 end
+
 # geo_url = "https://maps.googleapis.com/maps/api/geocode/json?address=Montreal,QC&key=#{ENV["GOOGLE_API_LEO"]}"
 # geo_json = open(geo_url).read
 # geocode = JSON.parse(geo_json)
@@ -108,4 +109,5 @@ end
 #   time: weather_condition["time"]
 #   )
 # end
+
 

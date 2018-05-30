@@ -26,6 +26,51 @@ class CalendarsController < ApplicationController
 
     @events = service.list_events("primary").items
     @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
+    @busys = seperate_busys_by_date(@busys)
+    @availibilities = availibilities(@busys)
+    # @free_time_duration = free_time_duration(@availibilities)
+  end
+  def availibilities(busys)
+    availibilities = []
+    busys.each do |busy|
+      date = busy[0][:start]
+      i = 0
+      a = []
+      a << after_wake_up(busy, date)
+      while i < busy.length - 1
+        a << { start: busy[i][:end], end: busy[i + 1][:start] }
+        i += 1
+      end
+      a << before_sleep(busy, date)
+      availibilities << a
+    end
+    availibilities
+  end
+
+  def after_wake_up(busy, date)
+    wake_up = DateTime.new(date.year, date.month, date.day, 8, 0, 0, '-04:00')
+    { start: wake_up, end: busy[0][:start] }
+  end
+
+  def before_sleep(busy, date)
+    _sleep = DateTime.new(date.year, date.month, date.day, 22, 0, 0, '-04:00')
+    { start: busy.last[:end], end: _sleep  }
+  end
+
+  def free_time_duration(availibilities)
+    availibilities.map { |availibility| ((availibility[:start] - availibility[:end]) * -24 * 60).to_f  }
+  end
+
+  def seperate_busys_by_date(busys)
+    day = DateTime.now.day
+    i = 1
+    new_busys = []
+    for day in day..(busys.last[:start].day)
+      new_busys << busys.select { |busy| busy[:start].day == day }
+      day += 1
+    end
+    new_busys
+
 
     # rescue Google::Apis::AuthorizationError
     # response = client.refresh!
@@ -33,6 +78,7 @@ class CalendarsController < ApplicationController
     # session[:authorization] = session[:authorization].merge(response)
 
     # retry
+
   end
 
   private
