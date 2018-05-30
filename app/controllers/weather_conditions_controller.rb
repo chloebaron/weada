@@ -7,6 +7,15 @@ class WeatherConditionsController < ApplicationController
     get_weather_conditions_in_json
   end
 
+  # def sunny?
+  #   temperature >= 15.0,
+  #   apparent_temperature >= 15.0,
+  #   cloud_cover <= .20,
+  #   wind_speed <= 15.0,
+  #   precip_probability <= .20,
+  #   precip_type = :precip_type,
+  # end
+
   private
 
   def get_weather_conditions_in_json
