@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_05_30_170210) do
-
+ActiveRecord::Schema.define(version: 2018_05_30_194030) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -24,6 +23,7 @@ ActiveRecord::Schema.define(version: 2018_05_30_170210) do
     t.boolean "warm_required"
     t.boolean "dry_required"
     t.boolean "calm_required"
+    t.integer "preference"
   end
 
   create_table "hourly_weathers", force: :cascade do |t|

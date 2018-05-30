@@ -26,13 +26,10 @@ class CalendarsController < ApplicationController
 
     @events = service.list_events("primary").items
     @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 14c8db75df724ab1d257f3ce2973eb0cc2752b87
     @busys = seperate_busys_by_date(@busys)
     @availibilities = availibilities(@busys)
-    # @free_time_duration = free_time_duration(@availibilities)
+    determine_time_slot(@availibilities, 30)
+    raise
   end
   def availibilities(busys)
     availibilities = []
@@ -74,6 +71,21 @@ class CalendarsController < ApplicationController
       day += 1
     end
     new_busys
+  end
+
+  def determine_time_slot(availibilities, duration_input)
+    filtered = availibilities.flatten.select do |availibility|
+      calculate_time(availibility) >= duration_input
+    end
+  # We can only check the start_time weahter condition and end_time weather condition
+    filtered.each do |f|
+      f[:start] + duration_input.minutes
+    end
+  end
+
+  def calculate_time(availibility)
+    ((availibility[:end] - availibility[:start]) * 24 * 60).to_f
+  end
 
     # rescue Google::Apis::AuthorizationError
     # response = client.refresh!
@@ -81,8 +93,6 @@ class CalendarsController < ApplicationController
     # session[:authorization] = session[:authorization].merge(response)
 
     # retry
-
-  end
 
   private
 
