@@ -1,5 +1,4 @@
 class CalendarsController < ApplicationController
-  #skip_before_action :authenticate_user!, only: [:show]
 
   def show
     client = Signet::OAuth2::Client.new(client_options)
@@ -27,6 +26,7 @@ class CalendarsController < ApplicationController
 
     @events = service.list_events("primary").items
     @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
+<<<<<<< HEAD
     @busys = seperate_busys_by_date(@busys)
     @availibilities = availibilities(@busys)
     # @free_time_duration = free_time_duration(@availibilities)
@@ -71,6 +71,13 @@ class CalendarsController < ApplicationController
       day += 1
     end
     new_busys
+
+    # rescue Google::Apis::AuthorizationError
+    # response = client.refresh!
+
+    # session[:authorization] = session[:authorization].merge(response)
+
+    # retry
   end
 
   private

@@ -10,17 +10,33 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_05_29_173514) do
+ActiveRecord::Schema.define(version: 2018_05_30_170210) do
+
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "activities", force: :cascade do |t|
     t.string "name"
-    t.string "category"
-    t.string "weather_condition"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "sunny_required"
+    t.boolean "warm_required"
+    t.boolean "dry_required"
+    t.boolean "calm_required"
+  end
+
+  create_table "hourly_weathers", force: :cascade do |t|
+    t.float "temperature"
+    t.float "apparent_temperature"
+    t.float "cloud_cover"
+    t.float "wind_speed"
+    t.float "precip_probability"
+    t.datetime "time"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "precip_type"
+    t.string "summary"
   end
 
   create_table "user_events", force: :cascade do |t|
@@ -58,19 +74,6 @@ ActiveRecord::Schema.define(version: 2018_05_29_173514) do
     t.boolean "admin"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
-  end
-
-  create_table "weather_conditions", force: :cascade do |t|
-    t.string "location"
-    t.float "temperature"
-    t.float "apparent_temperature"
-    t.float "cloud_cover"
-    t.float "wind_speed"
-    t.float "precip_probability"
-    t.string "precip_type"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.integer "day"
   end
 
   add_foreign_key "user_events", "activities"
