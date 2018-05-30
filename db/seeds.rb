@@ -22,6 +22,7 @@ User.create!(
   )
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 user_address = User.first.address
 
 geo_url = "https://maps.googleapis.com/maps/api/geocode/json?address=#{user_address}&key=#{ENV["GEOCODE_API_LEO"]}"
@@ -49,6 +50,9 @@ seven_day_cycle[0].each do |weather_condition|
   )
 end
 =======
+=======
+
+>>>>>>> 14c8db75df724ab1d257f3ce2973eb0cc2752b87
 # geo_url = "https://maps.googleapis.com/maps/api/geocode/json?address=Montreal,QC&key=#{ENV["GOOGLE_API_LEO"]}"
 # geo_json = open(geo_url).read
 # geocode = JSON.parse(geo_json)
@@ -71,5 +75,9 @@ end
 #   time: weather_condition["time"]
 #   )
 # end
+<<<<<<< HEAD
 >>>>>>> 19323c3c733aeda909aece088ec19c14ec3d6966
+=======
+
+>>>>>>> 14c8db75df724ab1d257f3ce2973eb0cc2752b87
 

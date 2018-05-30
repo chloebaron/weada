@@ -27,6 +27,9 @@ class CalendarsController < ApplicationController
     @events = service.list_events("primary").items
     @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 14c8db75df724ab1d257f3ce2973eb0cc2752b87
     @busys = seperate_busys_by_date(@busys)
     @availibilities = availibilities(@busys)
     # @free_time_duration = free_time_duration(@availibilities)
@@ -78,6 +81,7 @@ class CalendarsController < ApplicationController
     # session[:authorization] = session[:authorization].merge(response)
 
     # retry
+
   end
 
   private
