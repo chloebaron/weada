@@ -94,26 +94,32 @@ class CalendarsController < ApplicationController
     a = 60 - event[:start].minute
     event[:start] += a.minute
     event[:start] -= even[start:].second
-    event[:end] + duration_input.minute
+    event[:end] += duration_input.minute
+    event
   end
 
   def event_h(f, duration_input)
     { start: f[:start], end: f[:start] + duration_input.minute }
   end
-
-  def each_slot(f, )
-
-  end
-
-  def determine_time_slot(filtered, duration_input, activity)
-    filtered.each do |f|
-      event = event_h(f, duration_input)
-      event_weathers(event)
+  # find all posibilities in one slot
+  def each_slot(f, duration_input, activity)
+    event = event_h(f, duration_input)
+    event_weathers(event)
+    events = []
+    until event[:end] > f[:end]
       if all_event_weathers_good?(event_weathers, activity)
-        event
+        events << event
       else
         move_forward(event, duration_input)
       end
+    end
+    events
+  end
+  # find all free time slot that is suitable for acvity
+  def all_slot(filtered, duration_input, activity)
+    all = []
+    filtered.each do |f|
+      all << each_slot(f, duration_input, activity) unless each_slot(f, duration_input, activity).empty?
     end
   end
 
