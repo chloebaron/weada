@@ -28,9 +28,10 @@ class CalendarsController < ApplicationController
     @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
     @busys = seperate_busys_by_date(@busys)
     @availibilities = availibilities(@busys)
-    determine_time_slot(@availibilities, 30)
-    raise
+    filtered = filtered_by_duration(@availibilities, duration_input)
+    determine_time_slot(filtered, duration_input, activity)
   end
+
   def availibilities(busys)
     availibilities = []
     busys.each do |busy|
@@ -58,34 +59,66 @@ class CalendarsController < ApplicationController
     { start: busy.last[:end], end: _sleep  }
   end
 
-  # def free_time_duration(availibilities)
-  #   availibilities.map { |availibility| ((availibility[:start] - availibility[:end]) * -24 * 60).to_f  }
-  # end
-
   def seperate_busys_by_date(busys)
-    day = DateTime.now.day
-    i = 1
+    current_day = DateTime.now.day
     new_busys = []
-    for day in day..(busys.last[:start].day)
-      new_busys << busys.select { |busy| busy[:start].day == day }
-      day += 1
+    for current_day in current_day..(busys.last[:start].day)
+      new_busys << busys.select { |busy| busy[:start].day == current_day }
+      current_day += 1
     end
     new_busys
-  end
-
-  def determine_time_slot(availibilities, duration_input)
-    filtered = availibilities.flatten.select do |availibility|
-      calculate_time(availibility) >= duration_input
-    end
-  # We can only check the start_time weahter condition and end_time weather condition
-    filtered.each do |f|
-      f[:start] + duration_input.minutes
-    end
   end
 
   def calculate_time(availibility)
     ((availibility[:end] - availibility[:start]) * 24 * 60).to_f
   end
+#preference
+  def filtered_by_duration(availibilities, duration_input)
+      filtered = availibilities.flatten.select do |availibility|
+        calculate_time(availibility) >= duration_input
+      end
+  end
+
+  def event_weathers(event)
+    event_weathers = HourlyWeather.all.select do |w|
+      w.time - w.time.to_datetime.minute.minute >= event[:start] && w.time <= event[:end]
+    end
+    event_weathers
+  end
+
+  def all_event_weathers_good?(event_weathers, activity)
+    event_weathers.all? { |e| activity.permitted_under_weather(e) }
+  end
+
+  def move_forward(event, duration_input)
+    a = 60 - event[:start].minute
+    event[:start] += a.minute
+    event[:start] -= even[start:].second
+    event[:end] + duration_input.minute
+  end
+
+  def event_h(f, duration_input)
+    { start: f[:start], end: f[:start] + duration_input.minute }
+  end
+
+  def each_slot(f, )
+
+  end
+
+  def determine_time_slot(filtered, duration_input, activity)
+    filtered.each do |f|
+      event = event_h(f, duration_input)
+      event_weathers(event)
+      if all_event_weathers_good?(event_weathers, activity)
+        event
+      else
+        move_forward(event, duration_input)
+      end
+    end
+  end
+
+
+
 
     # rescue Google::Apis::AuthorizationError
     # response = client.refresh!
