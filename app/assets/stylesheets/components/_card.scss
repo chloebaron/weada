@@ -1,32 +1,30 @@
 .card {
   height: 175px;
   text-shadow: 0 1px 3px rgba(0,0,0,0.6);
-  background-size: cover !important;
-  background-position: center;
+  // background-size: cover !important;
+  // background-position: center;
   color: white;
   position: relative;
+  margin: 10px;
+  text-align: center;
+  padding: 5px;
 }
 
-.card-category {
+.card-duration {
   position: absolute;
   top: 10px;
   left: 10px;
   font-size: 15px;
   text-transform: uppercase;
 }
-.card-description {
+.card-name {
   position: absolute;
-  text-align: center;
-  margin: auto;
-}
-.card-description h2 {
   font-size: 24px;
+  top: 50px;
+  width: 100%;
+  margin: 0, auto;
 }
-.card-description p {
-  font-size: 14px;
-  opacity: 0.7;
-  font-weight: lighter;
-}
+
 .card-link {
   position: absolute;
   top: 0;

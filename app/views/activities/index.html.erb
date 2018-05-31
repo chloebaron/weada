@@ -1,18 +1,23 @@
-
 <div class="container">
-  <h2>Choose your activities for the week!</h2>
+  <h1>Choose your activities for the week!</h1>
   <div class="row">
-    <% @activities.each do |activity| %>
-    <div class="col-xs-12 col-sm-6 col-sm-offset-3">
-      <div class="card" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.2));">
-        <div class="card-category">Duration TODO Input</div>
-        <div class="card-description">
-          <h2><%= activity.name %></h2>
+    <!-- # Form for new_user_event -->
+
+    <%= form_tag('/user_events', {:method => :post}) do %>
+      <!-- # iterating over each activity -->
+      <% @activities.each do |activity| %>
+        <div class="col-xs-12 col-sm-6 col-md-3">
+          <div class="card" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.2));">
+            <div class="card-name">
+              <%= check_box_tag 'activity_ids[]', activity.id %>
+              <%= activity.name %>
+            </div>
+          </div>
         </div>
-        <a class="card-link" href="#" ></a>
-      </div>
-    </div>
+      <% end %>
+      <div><%= submit_tag 'Save' %></div>
     <% end %>
   </div>
 </div>
+
 

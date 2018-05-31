@@ -97,7 +97,7 @@ class CalendarsController < ApplicationController
   def move_forward(event, duration_input)
     a = 60 - event[:start].minute
     event[:start] += a.minute
-    event[:start] -= even[start:].second
+    event[:start] -= event[:start].second
     event[:end] += duration_input.minute
     event
   end
