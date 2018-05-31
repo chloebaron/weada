@@ -1,0 +1,18 @@
+
+<div class="container">
+  <h2>Choose your activities for the week!</h2>
+  <div class="row">
+    <% @activities.each do |activity| %>
+    <div class="col-xs-12 col-sm-6 col-sm-offset-3">
+      <div class="card" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.2));">
+        <div class="card-category">Duration TODO Input</div>
+        <div class="card-description">
+          <h2><%= activity.name %></h2>
+        </div>
+        <a class="card-link" href="#" ></a>
+      </div>
+    </div>
+    <% end %>
+  </div>
+</div>
+

@@ -1,12 +1,3 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the rails db:seed command (or created alongside the database with db:setup).
-#
-# Examples:
-#
-#   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
-#   Character.create(name: 'Luke', movie: movies.first)
-
-# If you have your own seed please comment blow
 # User.create(email: "admin@admin.com", password: "testing", admin: true)
 # User.create(email: "user@user.com", password: "testing")
 Activity.destroy_all
@@ -21,31 +12,80 @@ User.create!(
   address: " 5333 Avenue Casgrain #102, Montréal, QC H2T 1X6".strip.gsub(/\s+/, " ").gsub(/(\(|\)|\#)/, "").unicode_normalize(:nfkd).encode('ASCII', replace: '')
   )
 
-user_address = User.first.address
 
-geo_url = "https://maps.googleapis.com/maps/api/geocode/json?address=#{user_address}&key=#{ENV["GEOCODE_API_LEO"]}"
-geo_json = open(geo_url).read
-geocode = JSON.parse(geo_json)
-geo_location = geocode["results"][0]["geometry"]["location"]
-
-weather_url = "https://api.darksky.net/forecast/#{ENV["DARKSKY_API_LEO"]}/#{geo_location['lat']},#{geo_location['lng']}"
-weather_json = open(weather_url).read
-weather = JSON.parse(weather_json)
-
-seven_day_cycle = [weather["daily"]["data"]]
-
-seven_day_cycle[0].each do |weather_condition|
-  date_day = Time.at(weather_condition["time"]).day
-  WeatherCondition.create!(
-  location: user_address,
-  temperature: weather_condition["temperatureHigh"],
-  apparent_temperature: weather_condition["apparentTemperatureHigh"],
-  cloud_cover: weather_condition["cloudCovers"].to_f,
-  wind_speed: weather_condition["windSpeed"].to_f,
-  precip_probability: weather_condition["precipProbability"].to_f,
-  precip_type: weather_condition["precipType"],
-  day: date_day
-  )
+{
+  "run" => {
+    name: "Go for a run",
+    sunny_required: false,
+    warm_required: false,
+    dry_required: true,
+    calm_required: true
+  },
+  "park" => {
+    name: "Spend time in the park",
+    sunny_required: true,
+    warm_required: true,
+    dry_required: true,
+    calm_required: true
+  },
+  "museum" => {
+    name: "Go to a Museum",
+    sunny_required: false,
+    warm_required: false,
+    dry_required: false,
+    calm_required: false,
+  },
+  "bbq" => {
+    name: "Have a Barbeque",
+    sunny_required: false,
+    warm_required: true,
+    dry_required: true,
+    calm_required: true
+  },
+  "yoga" => {
+    name: "Do a Yoga video",
+    sunny_required: false,
+    warm_required: false,
+    dry_required: false,
+    calm_required: false
+  },
+  "cinema" => {
+    name: "Go to the Cinema",
+    sunny_required: false,
+    warm_required: false,
+    dry_required: false,
+    calm_required: false
+  },
+  "drinks" => {
+    name: "Drinks on a Terrace",
+    sunny_required: true,
+    warm_required: true,
+    dry_required: true,
+    calm_required: true
+  },
+  "read" => {
+    name: "Read a Book",
+    sunny_required: false,
+    warm_required: false,
+    dry_required: false,
+    calm_required: false
+  },
+  "gallery" => {
+    name: "Check out an Art Gallery",
+    sunny_required: false,
+    warm_required: false,
+    dry_required: false,
+    calm_required: false
+  },
+  "Sit in a cafe" => {
+    name: "Sit in a cafe",
+    sunny_required: false,
+    warm_required: false,
+    dry_required: false,
+    calm_required: false
+  }
+}.values.each do |e|
+ Activity.create(e)
 end
 
 # geo_url = "https://maps.googleapis.com/maps/api/geocode/json?address=Montreal,QC&key=#{ENV["GOOGLE_API_LEO"]}"
