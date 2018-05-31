@@ -2,15 +2,49 @@
   <div class="col-xs-12 col-sm-6 col-sm-offset-3">
     <div class="card activities">
       <h1>Choose your activities for the week!</h1>
-      <%= simple_form_for(@user_event) do |f| %>
-      <%= f.association :activities, as: :check_boxes %>
-      <%= f.input :duration, placeholder: "30, 60, 120 minutes" %>
-      <%= f.submit "Save", class: "btn btn-primary"  %>
-      <% end %>
+      <%# simple_form_for(@user_event) do |f| %>
+      <%# f.association :activities, as: :check_boxes %>
+      <%# f.input :duration, placeholder: "30, 60, 120 minutes" %>
+      <%# f.submit "Save", class: "btn btn-primary"  %>
+      <%# end %>
+      # Form action: create user_events
+       <% @activities.each do |activity| %>
+        # checkbox tag
+       <% end %>
+      # submit button
     </div>
   </div>
 </div>
 </div>
+
+<!-- # Choose activities he wants to do
+# Create User_Events without all the details (UserEventsController)
+# Choose duration, name ...
+# Update The activities (UserEventsController)
+# Redirect_to User Calendar Page -->
+
+<!-- # Choose activities he wants to do
+# Create User_Events without all the details (UserEventsController)
+# Choose duration, name ...
+# Update The activities (UserEventsController)
+# Redirect_to User Calendar Page -->
+
+<!-- <div class="container">
+  <h2>Choose your activities for the week!</h2>
+
+    <% @activities.each do |activity| %>
+    <div class="col-xs-12 col-sm-6 col-md-3">
+      <div class="card" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.2));">
+        <div class="card-duration">Duration</div>
+        <div class="card-name">
+          <%= activity.name %>
+        </div>
+        <a class="card-link" href="#" ></a>
+      </div>
+    </div>
+    <% end %>
+  </div>
+</div> -->
 
 
 
