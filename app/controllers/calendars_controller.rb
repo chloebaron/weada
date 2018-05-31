@@ -52,6 +52,13 @@ class CalendarsController < ApplicationController
     availibilities
   end
 
+  def free_day_availibilities(busys)
+    current_day = DateTime.now
+    if (busys.last - current_day).day >= 1
+
+    end
+  end
+
   def after_wake_up(busy, date)
     wake_up = DateTime.new(date.year, date.month, date.day, 8, 0, 0, '-04:00')
     { start: wake_up, end: busy[0][:start] }
@@ -118,6 +125,7 @@ class CalendarsController < ApplicationController
   end
 
   # find all posibilities in one slot
+  # find all posibilities to insert events by moving forward in interval
   def each_slot(f, duration_input, activity)
     event = event_h(f, duration_input) # => { start: , end:  }
     events = []
@@ -129,7 +137,7 @@ class CalendarsController < ApplicationController
     end
     events # => [...]
   end
-
+  # find all posibilities to insert events by movinfg forward in duration
   def each_slot_b(f, duration_input, activity)
     event = event_h(f, duration_input) # => { start: , end:  }
     events = []
