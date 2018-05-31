@@ -23,6 +23,7 @@ ActiveRecord::Schema.define(version: 2018_05_30_180629) do
     t.boolean "warm_required"
     t.boolean "dry_required"
     t.boolean "calm_required"
+    t.integer "preference"
   end
 
   create_table "hourly_weathers", force: :cascade do |t|

@@ -26,10 +26,13 @@ class CalendarsController < ApplicationController
 
     @events = service.list_events("primary").items
     @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
-    @busys = seperate_busys_by_date(@busys)
-    @availibilities = availibilities(@busys)
-    # @free_time_duration = free_time_duration(@availibilities)
+    # Not necessary to rename, but rename can be more clear
+    @busys_seperated = seperate_busys_by_date(@busys_seperated)
+    @availibilities = availibilities(@busys_seperated)
+    filtered = filtered_by_duration(@availibilities, duration_input)
+    determine_time_slot(filtered, duration_input, activity)
   end
+
   def availibilities(busys)
     availibilities = []
     busys.each do |busy|
@@ -57,19 +60,81 @@ class CalendarsController < ApplicationController
     { start: busy.last[:end], end: _sleep  }
   end
 
-  def free_time_duration(availibilities)
-    availibilities.map { |availibility| ((availibility[:start] - availibility[:end]) * -24 * 60).to_f  }
-  end
-
   def seperate_busys_by_date(busys)
-    day = DateTime.now.day
-    i = 1
+    current_day = DateTime.now.day
     new_busys = []
-    for day in day..(busys.last[:start].day)
-      new_busys << busys.select { |busy| busy[:start].day == day }
-      day += 1
+    for current_day in current_day..(busys.last[:start].day)
+      new_busys << busys.select { |busy| busy[:start].day == current_day }
+      current_day += 1
     end
     new_busys
+  end
+
+  def calculate_time(availibility)
+    ((availibility[:end] - availibility[:start]) * 24 * 60).to_f
+  end
+  def filtered_by_duration(availibilities, duration_input)
+      filtered = availibilities.flatten.select do |availibility|
+        calculate_time(availibility) >= duration_input
+      end
+  end
+
+  def event_weathers(event)
+    event_weathers = HourlyWeather.all.select do |w|
+      w.time - w.time.to_datetime.minute.minute >= event[:start] && w.time <= event[:end]
+    end
+    event_weathers
+  end
+
+  def all_event_weathers_good?(event_weathers, activity)
+    event_weathers.all? { |e| activity.permitted_under_weather(e) }
+  end
+
+  # attempt to set event by moving forward the start time in a new hour, eg.
+  # previous attempt start time is 8: 40, next attempt start time would be 9:00
+  # instead of moving forward in a fixed amount
+  # the point is to check through all weather conditions during an event
+  def move_forward(event, duration_input)
+    a = 60 - event[:start].minute
+    event[:start] += a.minute
+    event[:start] -= even[start:].second
+    event[:end] += duration_input.minute
+    event
+  end
+
+  def event_h(f, duration_input)
+    { start: f[:start], end: f[:start] + duration_input.minute }
+  end
+
+  # find all posibilities in one slot
+  def each_slot(f, duration_input, activity)
+    event = event_h(f, duration_input) # => { start: , end:  }
+    event_weathers(event)
+    events = []
+    until event[:end] > f[:end]
+      if all_event_weathers_good?(event_weathers, activity)
+        events << event
+      else
+        move_forward(event, duration_input)
+      end
+    end
+    events # => [...]
+  end
+
+  # find all free time slot that is suitable for acvity
+  def all_slot(filtered, duration_input, activity)
+    all = []
+    filtered.each do |f|
+      all << each_slot(f, duration_input, activity) unless each_slot(f, duration_input, activity).empty?
+    end
+    all # => [[..], [...] ]
+  end
+
+  # another big challenge
+  # what if there is no suitable slot?
+  # We might ajust the duration to see if there is any suitable slot
+
+
 
 
     # rescue Google::Apis::AuthorizationError
@@ -78,8 +143,6 @@ class CalendarsController < ApplicationController
     # session[:authorization] = session[:authorization].merge(response)
 
     # retry
-
-  end
 
   private
 

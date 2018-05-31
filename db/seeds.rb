@@ -12,6 +12,7 @@ User.create!(
   address: " 5333 Avenue Casgrain #102, Montréal, QC H2T 1X6".strip.gsub(/\s+/, " ").gsub(/(\(|\)|\#)/, "").unicode_normalize(:nfkd).encode('ASCII', replace: '')
   )
 
+
 {
   "run" => {
     name: "Go for a run",
