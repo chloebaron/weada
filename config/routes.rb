@@ -8,9 +8,8 @@ Rails.application.routes.draw do
 
   resources :user_events, only: [:new, :create, :edit, :update, :destroy]
 
-  get '/calendar', to: 'calendars#show'
-
   get '/redirect', to: 'calendars#redirect', as: 'redirect'
   get '/callback', to: 'calendars#callback', as: 'callback'
+  get '/calendars', to: 'calendars#calendars', as: 'calendars'
 
 end

@@ -1,6 +1,7 @@
 class CalendarsController < ApplicationController
+  before_action :get_client_session, only: [:calendars]
 
-  def show
+  def redirect
     client = Signet::OAuth2::Client.new(client_options)
     redirect_to client.authorization_uri.to_s
   end
@@ -8,8 +9,10 @@ class CalendarsController < ApplicationController
   def callback
     client = Signet::OAuth2::Client.new(client_options)
     client.code = params[:code]
+
     response = client.fetch_access_token!
-    client.update!(response)
+
+    session[:authorization] = response
 
     service = Google::Apis::CalendarV3::CalendarService.new
     service.authorization = client
@@ -27,12 +30,37 @@ class CalendarsController < ApplicationController
     @events = service.list_events("primary").items
     @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
     # Not necessary to rename, but rename can be more clear
-    @busys_seperated = seperate_busys_by_date(@busys_seperated)
+    @busys_seperated = seperate_busys_by_date(@busys)
     @availibilities = availibilities(@busys_seperated)
-    filtered = filtered_by_duration(@availibilities, duration_input)
-    determine_time_slot(filtered, duration_input, activity)
+    # filtered = filtered_by_duration(@availibilities)
+    # , duration_input when implemented properly
+    # determine_time_slot(filtered, duration_input, activity)
+    redirect_to calendars_url
   end
 
+  def calendars
+    get_service_methods(@client)
+
+    @calendar_list = @service.list_calendar_lists
+  end
+
+  def insert_weada_event(user_weada_event)
+    get_service_methods(@client)
+
+    event = Google::Apis::CalendarV3::Event.new({
+      start: Google::Apis::CalendarV3::EventDateTime.new(user_weada_event.start_time),
+      end: Google::Apis::CalendarV3::EventDateTime.new(user_weada_event.end_time),
+      summary: user_weada_event.activity.name
+    })
+
+    @service.insert_event(params[:calendar_id], event)
+  end
+
+
+
+
+
+###################################--METHODS FOR FINDING AVAILABLE TIME--#################################
   def availibilities(busys)
     availibilities = []
     busys.each do |busy|
@@ -73,12 +101,16 @@ class CalendarsController < ApplicationController
   def calculate_time(availibility)
     ((availibility[:end] - availibility[:start]) * 24 * 60).to_f
   end
+
   def filtered_by_duration(availibilities, duration_input)
-      filtered = availibilities.flatten.select do |availibility|
-        calculate_time(availibility) >= duration_input
-      end
+    filtered = availibilities.flatten.select do |availibility|
+      calculate_time(availibility) >= duration_input
+    end
   end
 
+
+
+###################################--METHODS FOR FINDING SUITABLE WEATHER CONDITIONS--#################################
   def event_weathers(event)
     event_weathers = HourlyWeather.all.select do |w|
       w.time - w.time.to_datetime.minute.minute >= event[:start] && w.time <= event[:end]
@@ -90,6 +122,10 @@ class CalendarsController < ApplicationController
     event_weathers.all? { |e| activity.permitted_under_weather(e) }
   end
 
+
+
+
+###################################--METHODS FOR FINDING POSITION IN SUITABLE WEATHER SLOT--#################################
   # attempt to set event by moving forward the start time in a new hour, eg.
   # previous attempt start time is 8: 40, next attempt start time would be 9:00
   # instead of moving forward in a fixed amount
@@ -97,7 +133,7 @@ class CalendarsController < ApplicationController
   def move_forward(event, duration_input)
     a = 60 - event[:start].minute
     event[:start] += a.minute
-    event[:start] -= even[start:].second
+    event[:start] -= event[:start].second
     event[:end] += duration_input.minute
     event
   end
@@ -137,14 +173,24 @@ class CalendarsController < ApplicationController
 
 
 
-    # rescue Google::Apis::AuthorizationError
-    # response = client.refresh!
+  # rescue Google::Apis::AuthorizationError
+  # response = client.refresh!
 
-    # session[:authorization] = session[:authorization].merge(response)
+  # session[:authorization] = session[:authorization].merge(response)
 
-    # retry
+  # retry
 
   private
+
+  def get_client_session
+    @client = Signet::OAuth2::Client.new(client_options)
+    @client.update!(session[:authorization])
+  end
+
+  def get_service_methods(client)
+    @service = Google::Apis::CalendarV3::CalendarService.new
+    @service.authorization = client
+  end
 
   def client_options
     {
@@ -153,7 +199,7 @@ class CalendarsController < ApplicationController
       authorization_uri: 'https://accounts.google.com/o/oauth2/auth',
       token_credential_uri: 'https://accounts.google.com/o/oauth2/token',
       scope: Google::Apis::CalendarV3::AUTH_CALENDAR,
-      redirect_uri: ENV["CALLBACK_URL"]
+      redirect_uri: callback_url
     }
   end
 end
