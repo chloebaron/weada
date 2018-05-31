@@ -12,6 +12,4 @@ class CalendarPolicy < ApplicationPolicy
   def callback?
     true
   end
-
-
 end
