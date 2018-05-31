@@ -7,15 +7,11 @@
     <% end %>
 <% end %>
 
-<h2>before</h2>
-<% @before.each do |before|%>
-  <p>Strat: <%= before[:start] %></p>
-  <p>End: <%= before[:end] %></p>
-<% end %>
-
 
 <h2>After</h2>
-<% @new_busys.each do |new_busys|%>
-  <p>Strat: <%= new_busys[:start] %></p>
-  <p>End: <%= new_busys[:end] %></p>
+<p><%= @busys.count %></p>
+<% @busys.each do |busys|%>
+  <p>Strat: <%= busys[:start] %></p>
+  <p>End: <%= busys[:end] %></p>
 <% end %>
+

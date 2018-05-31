@@ -42,15 +42,14 @@ class CalendarsController < ApplicationController
     @selected_activities = [Activity.find(2), Activity.find(3), Activity.find(4)]
 
     @placed_activities = []
-    @before = @busys
     @selected_activities.each do |activity|
       @busys_seperated = seperate_busys_by_date(@busys)
       @availibilities = availibilities(@busys_seperated)
+      @availibilities += free_day_availibilities(@busys, 8, 22)
       filtered = filtered_by_duration(@availibilities, 30)
       @a = all_slot(filtered, 30, activity)
       @b = all_slot_b(filtered, 30, activity)
       @c = mix(@a, @b)
-      byebug
       @placed_activities << @c.first
       @busys << @c.first
       # should implement the insert event call for api here???????
