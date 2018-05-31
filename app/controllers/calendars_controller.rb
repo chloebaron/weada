@@ -26,8 +26,9 @@ class CalendarsController < ApplicationController
 
     @events = service.list_events("primary").items
     @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
-    @busys = seperate_busys_by_date(@busys)
-    @availibilities = availibilities(@busys)
+    # Not necessary to rename, but rename can be more clear
+    @busys_seperated = seperate_busys_by_date(@busys_seperated)
+    @availibilities = availibilities(@busys_seperated)
     filtered = filtered_by_duration(@availibilities, duration_input)
     determine_time_slot(filtered, duration_input, activity)
   end
@@ -90,6 +91,10 @@ class CalendarsController < ApplicationController
     event_weathers.all? { |e| activity.permitted_under_weather(e) }
   end
 
+  # attempt to set event by moving forward the start time in a new hour, eg.
+  # previous attempt start time is 8: 40, next attempt start time would be 9:00
+  # instead of moving forward in a fixed amount
+  # the point is to check through all weather conditions during an event
   def move_forward(event, duration_input)
     a = 60 - event[:start].minute
     event[:start] += a.minute
@@ -101,9 +106,10 @@ class CalendarsController < ApplicationController
   def event_h(f, duration_input)
     { start: f[:start], end: f[:start] + duration_input.minute }
   end
+
   # find all posibilities in one slot
   def each_slot(f, duration_input, activity)
-    event = event_h(f, duration_input)
+    event = event_h(f, duration_input) # => { start: , end:  }
     event_weathers(event)
     events = []
     until event[:end] > f[:end]
@@ -113,14 +119,16 @@ class CalendarsController < ApplicationController
         move_forward(event, duration_input)
       end
     end
-    events
+    events # => [...]
   end
+
   # find all free time slot that is suitable for acvity
   def all_slot(filtered, duration_input, activity)
     all = []
     filtered.each do |f|
       all << each_slot(f, duration_input, activity) unless each_slot(f, duration_input, activity).empty?
     end
+    all # => [[..], [...] ]
   end
 
 
