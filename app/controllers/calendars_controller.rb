@@ -25,11 +25,12 @@ class CalendarsController < ApplicationController
 
     # filtered = filtered_by_duration(@availibilities)
     # , duration_input when implemented properly
-    # determine_time_slot(filtered, duration_i
-    @busys_seperated = seperate_busys_by_date(@busys)
-    @availibilities = availibilities(@busys_seperated)
-    @availibilities += free_day_availibilities(@busys, 8, 22)
-    filtered = filtered_by_duration(@availibilities, 30)
+
+
+    # @busys_seperated = seperate_busys_by_date(@busys)
+    # @availibilities = availibilities(@busys_seperated)
+    # @availibilities += free_day_availibilities(@busys, 8, 22)
+    # filtered = filtered_by_duration(@availibilities, 30)
 
     @selected_activities = [Activity.find(2), Activity.find(3), Activity.find(4)]
 

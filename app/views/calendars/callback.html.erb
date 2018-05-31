@@ -15,3 +15,10 @@
   <p>End: <%= busys[:end] %></p>
 <% end %>
 
+
+<h2>Availibilities</h2>
+<p><%= @availibilities.count %></p>
+<% @availibilities.each do |availibilities|%>
+  <p>Strat: <%= availibilities[:start] %></p>
+  <p>End: <%= availibilities[:end] %></p>
+<% end %>
