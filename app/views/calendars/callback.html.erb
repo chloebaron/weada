@@ -7,8 +7,15 @@
     <% end %>
 <% end %>
 
-<h2>Mix</h2>
-<% @c.each do |c|%>
-  <p>Strat: <%= c[:start] %></p>
-  <p>End: <%= c[:end] %></p>
+<h2>before</h2>
+<% @before.each do |before|%>
+  <p>Strat: <%= before[:start] %></p>
+  <p>End: <%= before[:end] %></p>
+<% end %>
+
+
+<h2>After</h2>
+<% @new_busys.each do |new_busys|%>
+  <p>Strat: <%= new_busys[:start] %></p>
+  <p>End: <%= new_busys[:end] %></p>
 <% end %>
