@@ -30,19 +30,33 @@ class CalendarsController < ApplicationController
     @events = service.list_events("primary").items
     @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
     # Not necessary to rename, but rename can be more clear
-    @busys_seperated = seperate_busys_by_date(@busys)
-    @availibilities = availibilities(@busys_seperated)
+
     # filtered = filtered_by_duration(@availibilities)
     # , duration_input when implemented properly
     # determine_time_slot(filtered, duration_input, activity)
-    redirect_to calendars_url
-
+    @busys_seperated = seperate_busys_by_date(@busys)
+    @availibilities = availibilities(@busys_seperated)
+    @availibilities += free_day_availibilities(@busys, 8, 22)
     filtered = filtered_by_duration(@availibilities, 30)
-    @a = all_slot(filtered, 30, Activity.find(2))
-    @b = all_slot_b(filtered, 30, Activity.find(2))
-    @c = mix(@a, @b)
 
-    redirect_to calendars_url
+    @selected_activities = [Activity.find(2), Activity.find(3), Activity.find(4)]
+
+    @placed_activities = []
+    @before = @busys
+    @selected_activities.each do |activity|
+      @busys_seperated = seperate_busys_by_date(@busys)
+      @availibilities = availibilities(@busys_seperated)
+      filtered = filtered_by_duration(@availibilities, 30)
+      @a = all_slot(filtered, 30, activity)
+      @b = all_slot_b(filtered, 30, activity)
+      @c = mix(@a, @b)
+      byebug
+      @placed_activities << @c.first
+      @busys << @c.first
+      # should implement the insert event call for api here???????
+      @new_busys = @busys.sort_by!{ |busy| busy[:start] }
+    end
+    # redirect_to calendars_url
   end
 
   def calendars
@@ -74,32 +88,50 @@ class CalendarsController < ApplicationController
       date = busy[0][:start]
       i = 0
       availibilities_for_day = []
-      availibilities_for_day << after_wake_up(busy, date)
+      availibilities_for_day << after_wake_up(busy, date) unless after_wake_up(busy, date).nil?
       while i < busy.length - 1
         availibilities_for_day << { start: busy[i][:end], end: busy[i + 1][:start] }
         i += 1
       end
-      availibilities_for_day << before_sleep(busy, date)
+      availibilities_for_day << before_sleep(busy, date) unless before_sleep(busy, date).nil?
       availibilities << availibilities_for_day
     end
-    availibilities
+    availibilities.flatten
   end
 
-  def free_day_availibilities(busys)
+  def free_day_availibilities(busys, wake_up_hour, sleep_hour)
     current_day = DateTime.now
-    if (busys.last - current_day).day >= 1
-
+    free_day_availibilities_array = []
+    free_days_num = (current_day + 4.day).mjd - busys.last[:start].mjd
+    last_busy_day = busys.last[:start]
+    i = 1
+    for i in 1..free_days_num
+      wake_up = DateTime.new(last_busy_day.year, last_busy_day.month, last_busy_day.day, wake_up_hour, 0, 0, '-4:00') + i.day
+      _sleep = DateTime.new(last_busy_day.year, last_busy_day.month, last_busy_day.day, sleep_hour, 0, 0, '-4:00') + i.day
+      free_day_availibilities_array << { start: wake_up, end: _sleep  }
+      i += 1
     end
+    free_day_availibilities_array
   end
 
   def after_wake_up(busy, date)
     wake_up = DateTime.new(date.year, date.month, date.day, 8, 0, 0, '-04:00')
-    { start: wake_up, end: busy[0][:start] }
+    current_date_time = DateTime.now
+    if current_date_time >= wake_up && current_date_time < busy[0][:start]
+      { start: current_date_time, end: busy[0][:start] }
+    elsif current_date_time < wake_up
+      { start: wake_up, end: busy[0][:start] }
+    end
   end
 
   def before_sleep(busy, date)
     _sleep = DateTime.new(date.year, date.month, date.day, 22, 0, 0, '-04:00')
-    { start: busy.last[:end], end: _sleep  }
+    current_date_time = DateTime.now
+    if current_date_time < _sleep  && current_date_time > busy.last[:end]
+      { start: cuurent_date_time, end: _sleep }
+    elsif current_date_time <= busy.last[:end]
+      { start: busy.last[:end], end: _sleep }
+    end
   end
 
   def seperate_busys_by_date(busys)
@@ -215,7 +247,6 @@ class CalendarsController < ApplicationController
   # another big challenge
   # what if there is no suitable slot?
   # We might ajust the duration to see if there is any suitable slot
-
 
 
 
