@@ -8,8 +8,8 @@
       <% @activities.each do |activity| %>
         <div class="col-xs-12 col-sm-6 col-md-3">
           <div class="card" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.2));">
+            <%= check_box_tag 'activity_ids[]', activity.id %>
             <div class="card-name">
-              <%= check_box_tag 'activity_ids[]', activity.id %>
               <%= activity.name %>
             </div>
           </div>

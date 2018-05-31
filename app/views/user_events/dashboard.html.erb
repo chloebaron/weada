@@ -1,5 +1,9 @@
 <h1>dashboard</h1>
 
-<% @events.each do |event| %>
-<p><%= event.activity.name %></p>
+<%= form_tag('/user_events/:id', {:method => :patch}) do %>
+  <% @events.each do |event| %>
+    <%= select(:user_events, event.id, [['30', 30], ['60', 60], ['90', 90], ['120', 120]]) %>
+    <p><%= event.activity.name %></p>
+    <% end %>
+  <div><%= submit_tag 'Save' %></div>
 <% end %>

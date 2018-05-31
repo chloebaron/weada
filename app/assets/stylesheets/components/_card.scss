@@ -8,21 +8,20 @@
   margin: 10px;
   text-align: center;
   padding: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.card-duration {
+#activity_ids_ {
   position: absolute;
   top: 10px;
   left: 10px;
-  font-size: 15px;
-  text-transform: uppercase;
 }
+
 .card-name {
   position: absolute;
-  font-size: 24px;
-  top: 50px;
   width: 100%;
-  margin: 0, auto;
 }
 
 .card-link {

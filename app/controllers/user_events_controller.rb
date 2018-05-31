@@ -1,5 +1,6 @@
 class UserEventsController < ApplicationController
   before_action :authenticate_user!, only: [:create]
+  before_action :set_event, only: [:edit, :update]
 
   def new
     @user_event = UserEvent.new
@@ -15,10 +16,16 @@ class UserEventsController < ApplicationController
   end
 
   def edit
-
+    # @eventevent.id?
   end
 
   def update
+    @events = UserEvent.where(user: current_user, status: 0)
+
+    @events.each do |event|
+      event.update(duration: params[:user_events][event.id.to_s])
+    end
+    redirect_to activities_path
   end
 
   def dashboard
@@ -32,5 +39,9 @@ class UserEventsController < ApplicationController
 
   def event_params
     params.permit(:activity_ids)
+  end
+
+  def set_event
+    @event = UserEvent.find_by(id: params[:id])
   end
 end
