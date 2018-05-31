@@ -1,5 +1,5 @@
 class CalendarsController < ApplicationController
-  before_action :get_client_session, only: [:calendars]
+  before_action :get_client_session, only: [:list_calendars, :create_weada_calendar]
 
   def redirect
     client = Signet::OAuth2::Client.new(client_options)
@@ -17,15 +17,7 @@ class CalendarsController < ApplicationController
     service = Google::Apis::CalendarV3::CalendarService.new
     service.authorization = client
 
-    free_busy_request = Google::Apis::CalendarV3::FreeBusyRequest.new
-    free_busy_request.time_min = DateTime.now
-    free_busy_request.time_max = DateTime.now + 5.days
-    free_busy_request.time_zone = "EST"
-    free_busy_request_item = Google::Apis::CalendarV3::FreeBusyRequestItem.new
-    free_busy_request_item.id = "primary"
-    free_busy_request.items = [ free_busy_request_item ]
-
-    free_busy = service.query_freebusy(free_busy_request)
+    free_busy = get_free_busy(service)
 
     @events = service.list_events("primary").items
     @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
@@ -33,7 +25,7 @@ class CalendarsController < ApplicationController
 
     # filtered = filtered_by_duration(@availibilities)
     # , duration_input when implemented properly
-    # determine_time_slot(filtered, duration_input, activity)
+    # determine_time_slot(filtered, duration_i
     @busys_seperated = seperate_busys_by_date(@busys)
     @availibilities = availibilities(@busys_seperated)
     @availibilities += free_day_availibilities(@busys, 8, 22)
@@ -58,14 +50,21 @@ class CalendarsController < ApplicationController
     # redirect_to calendars_url
   end
 
-  def calendars
+
+
+  def create_weada_calendar
     get_service_methods(@client)
 
-    @calendar_list = @service.list_calendar_lists
+    weada_calendar = Google::Apis::CalendarV3::Calendar.new(
+    summary: 'Weada',
+    time_zone: 'EST'
+  )
+   @weada_calendar = calendar_service.insert_calendar(weada_calendar)
   end
 
+
   def insert_weada_event(user_weada_event)
-    get_service_methods(@client)
+    list_calendars
 
     event = Google::Apis::CalendarV3::Event.new({
       start: Google::Apis::CalendarV3::EventDateTime.new(user_weada_event.start_time),
@@ -73,7 +72,9 @@ class CalendarsController < ApplicationController
       summary: user_weada_event.activity.name
     })
 
-    @service.insert_event(params[:calendar_id], event)
+    weada_calendar = @calendar_list.find {|calendar| calendar.summary == "Weada"}
+
+    @service.insert_event(weada_calendar.id, event)
   end
 
 
@@ -258,14 +259,44 @@ class CalendarsController < ApplicationController
 
   private
 
+
+  def delete_weada_calendar
+    list_calendars
+    weada_calendars = @calendar_list.find_all {|calendar| calendar.summary == "Weada"}
+    raise
+    weada_calendars.each { |weada_calendar| @service.delete_calendar_list(weada_calendar.id) }
+  end
+
+  def list_calendars
+    get_service_methods(@client)
+
+    @calendar_list = @service.list_calendar_lists.items
+  end
+
   def get_client_session
     @client = Signet::OAuth2::Client.new(client_options)
     @client.update!(session[:authorization])
+    @client
   end
 
   def get_service_methods(client)
     @service = Google::Apis::CalendarV3::CalendarService.new
     @service.authorization = client
+  end
+
+
+  def get_free_busy(calendar_service)
+    free_busy_request = Google::Apis::CalendarV3::FreeBusyRequest.new
+    free_busy_request.time_min = DateTime.now
+    free_busy_request.time_max = DateTime.now + 5.days
+    free_busy_request.time_zone = "EST"
+    free_busy_request_item = Google::Apis::CalendarV3::FreeBusyRequestItem.new
+    free_busy_request_item.id = "primary"
+    free_busy_request.items = [ free_busy_request_item ]
+
+    free_busy = calendar_service.query_freebusy(free_busy_request)
+
+    free_busy
   end
 
   def client_options

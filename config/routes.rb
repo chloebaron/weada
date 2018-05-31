@@ -10,7 +10,6 @@ Rails.application.routes.draw do
 
   get '/redirect', to: 'calendars#redirect', as: 'redirect'
   get '/callback', to: 'calendars#callback', as: 'callback'
-  get '/calendars', to: 'calendars#calendars', as: 'calendars'
 
   get '/dashboard', to: 'user_events#dashboard', as: 'dashboard'
 
