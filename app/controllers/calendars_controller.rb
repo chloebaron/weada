@@ -73,7 +73,6 @@ class CalendarsController < ApplicationController
   def calculate_time(availibility)
     ((availibility[:end] - availibility[:start]) * 24 * 60).to_f
   end
-#preference
   def filtered_by_duration(availibilities, duration_input)
       filtered = availibilities.flatten.select do |availibility|
         calculate_time(availibility) >= duration_input
@@ -130,6 +129,10 @@ class CalendarsController < ApplicationController
     end
     all # => [[..], [...] ]
   end
+
+  # another big challenge
+  # what if there is no suitable slot?
+  # We might ajust the duration to see if there is any suitable slot
 
 
 
