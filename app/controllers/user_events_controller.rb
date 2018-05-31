@@ -8,17 +8,22 @@ class UserEventsController < ApplicationController
   def create
     params[:activity_ids].each do |activity_id|
       activity = Activity.find(activity_id)
-      UserEvent.create(user: current_user, activity: activity )
+      UserEvent.create(user: current_user, activity: activity, status: 0)
     end
 
     redirect_to dashboard_path
   end
 
-  # def edit
-  # end
+  def edit
 
-  # def update
-  # end
+  end
+
+  def update
+  end
+
+  def dashboard
+    @events = UserEvent.all.where(user: current_user, status: 0)
+  end
 
   # def destroy
   # end
