@@ -32,30 +32,39 @@ class CalendarsController < ApplicationController
     # @availibilities += free_day_availibilities(@busys, 8, 22)
     # filtered = filtered_by_duration(@availibilities, 30)
 
-    @selected_activities = [Activity.find(2), Activity.find(3), Activity.find(4)]
-
+    @selected_activities = [Activity.find(3)]
+    @new_busys = @busys
     # how can we define the number for the most preferred one?
     #  for example, 1 is the most, 3, is the least???? Or in reverse
     @selected_activities.sort_by! { |activity| activity.preference }
 
     @placed_activities = []
     @selected_activities.each do |activity|
-      @busys_seperated = seperate_busys_by_date(@busys)
-      @availibilities = availibilities(@busys_seperated)
-      @availibilities += free_day_availibilities(@busys, 8, 22)
-      filtered = filtered_by_duration(@availibilities, 30)
-      @a = all_possibilities_in_all_availibilities_interval(filtered, 30, activity)
-      @b = all_possibilities_in_all_availibilities_duration(filtered, 30, activity)
-      @all_possibilities_insert_event = mix(@a, @b)
-      @placed_activities << @all_possibilities_insert_event.first
-      @busys << @all_possibilities_insert_event.first
-      # should implement the insert event call for api here???????
-      @new_busys = @busys.sort_by!{ |busy| busy[:start] }
+      @new_busys_seperated = seperate_busys_by_date(@new_busys)
+      @availibilities = availibilities(@new_busys_seperated)
+      @availibilities += free_day_availibilities(@new_busys, 8, 22)
+      filtered = filtered_by_duration(@availibilities, 600)
+      if filtered.empty?
+        @placed_activities << recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity)
+      else
+        @a = all_possibilities_in_all_availibilities_interval(filtered, 600, activity)
+        @b = all_possibilities_in_all_availibilities_duration(filtered, 600, activity)
+        @all_possibilities_insert_event = mix(@a, @b)
+        if @all_possibilities_insert_event.empty?
+          @placed_activities << recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity) unless recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity).nil?
+        else
+          @placed_activities << @all_possibilities_insert_event.first
+        end
+        @new_busys << @all_possibilities_insert_event.first
+        # should implement the insert event call for api here???????
+        @new_busys.sort_by!{ |busy| busy[:start] }
+      end
     end
     # redirect_to calendars_url
   end
 
-
+    # if selected activities not equal to palced_activities,
+    # we will ask user if he wanna adjust to see if there might be
 
   def create_weada_calendar
     get_service_methods(@client)
@@ -155,7 +164,7 @@ class CalendarsController < ApplicationController
   end
 
   def filtered_by_duration(availibilities, duration_input)
-    filtered = availibilities.flatten.select do |availibility|
+    availibilities.flatten.select do |availibility|
       calculate_time(availibility) >= duration_input
     end
   end
@@ -164,10 +173,15 @@ class CalendarsController < ApplicationController
 
 ###################################--METHODS FOR FINDING SUITABLE WEATHER CONDITIONS--#################################
   def event_weathers(event)
-    event_weathers_a = HourlyWeather.all.select do |w|
-      w.time - w.time.to_datetime.minute.minute >= event[:start] && w.time <= event[:end]
+    HourlyWeather.all.select do |w|
+      w.time >= event[:start] - event[:start].minute.minute && w.time <= event[:end]
     end
-    event_weathers_a # =>[...]
+  end
+
+  def each_interval_weather(interval_time_slot)
+    HourlyWeather.all.select do |w|
+      w.time.to_datetime == interval_time_slot[:start] -= interval_time_slot[:start].minute.minute
+    end
   end
 
   def all_event_weathers_good?(event_weathers_a, activity)
@@ -227,7 +241,6 @@ class CalendarsController < ApplicationController
     events # => [...]
   end
 
-
   # find all free time slot that is suitable for acvity
   def all_possibilities_in_all_availibilities_interval(filtered, duration_input, activity)
     all = []
@@ -250,6 +263,62 @@ class CalendarsController < ApplicationController
   def mix(interval, duration)
     (interval + duration).uniq.sort_by! { |e| e[:start] } # e => hash
   end
+
+
+  def get_all_interval_time_slot_in_one_availibility(availibility)
+    all_in_one_availibility = []
+    interval_time_slot = { start: availibility[:start], end: availibility[:start] + (60 - availibility[:start].minute).minute }
+    all_in_one_availibility << interval_time_slot
+    while interval_time_slot[:end] < availibility[:end]
+      if availibility[:end] - interval_time_slot[:end] > 1.hour
+        interval_time_slot[:start] = interval_time_slot[:end]
+        interval_time_slot[:end] += 1.hour
+      elsif availibility[:end] -  interval_time_slot[:end] < 1.hour && availibility[:end] -  interval_time_slot[:end] > 0
+        interval_time_slot[:start] = interval_time_slot[:end]
+        interval_time_slot[:end] = availibility[:end]
+      end
+      all_in_one_availibility << interval_time_slot
+    end
+    all_in_one_availibility
+  end
+
+  def merge_all_squent_suitable_time_slots_in_each_availibility(suitable_interval_time_slots)
+    merged_all_squent_suitable_time_slots = []
+      suitable_interval_time_slots.each_with_index do |e, index|
+        if !suitable_interval_time_slots[index + 1].nil?
+          if e[:end] == suitable_interval_time_slots[index + 1][:start]
+            e[:end] = suitable_interval_time_slots[index + 1][:end]
+            merged_all_squent_suitable_time_slots << e
+          else
+            merged_all_squent_suitable_time_slots << e
+          end
+        else
+          merged_all_squent_suitable_time_slots << e
+        end
+      end
+      merged_all_squent_suitable_time_slots
+
+  end
+
+  def recommend_longest_suitable_time_slot_from_all_availibilities(availibilities, activity)
+    all_candidates_from_each_merged = []
+    availibilities.each do |availibility|
+      all_in_one_availibility = get_all_interval_time_slot_in_one_availibility(availibility)
+      suitable_interval_time_slots = all_in_one_availibility.select do |e|
+        all_event_weathers_good?(each_interval_weather(e), activity)
+      end
+      a = merge_all_squent_suitable_time_slots_in_each_availibility(suitable_interval_time_slots)
+      all_candidates_from_each_merged << find_longest_suitale_time_slot_from_one_merged(a) unless find_longest_suitale_time_slot_from_one_merged(a).nil?
+    end
+    all_candidates_from_each_merged.sort_by! { |e| e[:end] - e[:start] }.last
+  end
+
+  def find_longest_suitale_time_slot_from_one_merged(merged_all_squent_suitable_time_slots)
+    merged_all_squent_suitable_time_slots.sort_by! { |e| e[:end] - e[:start] }.last
+  end
+
+
+
 
   # another big challenge
   # what if there is no suitable slot?
