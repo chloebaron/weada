@@ -25,11 +25,16 @@ class UserEventsController < ApplicationController
     @events.each do |event|
       event.update(duration: params[:user_events][event.id.to_s])
     end
-    redirect_to activities_path
+
+    redirect_to dashboard_path
+  end
+
+  def duration
+    @events = UserEvent.where(user: current_user, status: 0)
   end
 
   def dashboard
-    @events = UserEvent.all.where(user: current_user, status: 0)
+    @events = UserEvent.where(user: current_user, status: 0)
   end
 
   # def destroy

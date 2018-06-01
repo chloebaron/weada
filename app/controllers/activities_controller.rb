@@ -3,6 +3,13 @@ class ActivitiesController < ApplicationController
 
   def index
     @activities = Activity.all
+    @events = UserEvent.all.where(user: current_user, status: 0)
   end
+
+  # def duration
+  #   @events = UserEvent.all.where(user: current_user, status: 0)
+  # end
+
+
 end
 
