@@ -1,5 +1,5 @@
 class CalendarsController < ApplicationController
-  before_action :get_client_session, only: [:list_calendars, :create_weada_calendar]
+  before_action :get_client_session, only: [:list_calendars, :create_weada_calendar, :insert_weada_event]
 
   def redirect
     client = Signet::OAuth2::Client.new(client_options)
@@ -32,7 +32,7 @@ class CalendarsController < ApplicationController
     # @availibilities += free_day_availibilities(@busys, 8, 22)
     # filtered = filtered_by_duration(@availibilities, 30)
 
-    @selected_activities = [Activity.find(3)]
+    @selected_activities = [Activity.find(4)]
     @new_busys = @busys
     # how can we define the number for the most preferred one?
     #  for example, 1 is the most, 3, is the least???? Or in reverse
@@ -43,12 +43,12 @@ class CalendarsController < ApplicationController
       @new_busys_seperated = seperate_busys_by_date(@new_busys)
       @availibilities = availibilities(@new_busys_seperated)
       @availibilities += free_day_availibilities(@new_busys, 8, 22)
-      filtered = filtered_by_duration(@availibilities, 600)
+      filtered = filtered_by_duration(@availibilities, 100)
       if filtered.empty?
         @placed_activities << recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity)
       else
-        @a = all_possibilities_in_all_availibilities_interval(filtered, 600, activity)
-        @b = all_possibilities_in_all_availibilities_duration(filtered, 600, activity)
+        @a = all_possibilities_in_all_availibilities_interval(filtered, 100, activity)
+        @b = all_possibilities_in_all_availibilities_duration(filtered, 100, activity)
         @all_possibilities_insert_event = mix(@a, @b)
         if @all_possibilities_insert_event.empty?
           @placed_activities << recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity) unless recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity).nil?
@@ -60,29 +60,41 @@ class CalendarsController < ApplicationController
         @new_busys.sort_by!{ |busy| busy[:start] }
       end
     end
+
+    # create_weada_calendar(client)
+    user_weada_event =  UserEvent.create!(
+
+      start_time: @placed_activities.first[:start],
+      end_time: @placed_activities.first[:end],
+      activity_id: 4,
+      user_id: User.first.id,
+      duration: calculate_time(@placed_activities.first)
+       )
+      insert_weada_event(user_weada_event, client)
     # redirect_to calendars_url
   end
 
     # if selected activities not equal to palced_activities,
     # we will ask user if he wanna adjust to see if there might be
 
-  def create_weada_calendar
-    get_service_methods(@client)
+  def create_weada_calendar(client)
+    get_service_methods(client)
 
     weada_calendar = Google::Apis::CalendarV3::Calendar.new(
     summary: 'Weada',
     time_zone: 'EST'
   )
-   @weada_calendar = calendar_service.insert_calendar(weada_calendar)
+   @weada_calendar = @service.insert_calendar(weada_calendar)
   end
 
 
-  def insert_weada_event(user_weada_event)
-    list_calendars
+  def insert_weada_event(user_weada_event, client)
+    get_service_methods(client)
+    list_calendars(client)
 
     event = Google::Apis::CalendarV3::Event.new({
-      start: Google::Apis::CalendarV3::EventDateTime.new(user_weada_event.start_time),
-      end: Google::Apis::CalendarV3::EventDateTime.new(user_weada_event.end_time),
+      start: Google::Apis::CalendarV3::EventDateTime.new(date_time: user_weada_event.start_time.to_datetime),
+      end: Google::Apis::CalendarV3::EventDateTime.new(date_time: user_weada_event.end_time.to_datetime),
       summary: user_weada_event.activity.name
     })
 
@@ -343,8 +355,8 @@ class CalendarsController < ApplicationController
     weada_calendars.each { |weada_calendar| @service.delete_calendar_list(weada_calendar.id) }
   end
 
-  def list_calendars
-    get_service_methods(@client)
+  def list_calendars(client)
+    get_service_methods(client)
 
     @calendar_list = @service.list_calendar_lists.items
   end
