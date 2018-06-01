@@ -34,17 +34,21 @@ class CalendarsController < ApplicationController
 
     @selected_activities = [Activity.find(2), Activity.find(3), Activity.find(4)]
 
+    # how can we define the number for the most preferred one?
+    #  for example, 1 is the most, 3, is the least???? Or in reverse
+    @selected_activities.sort_by! { |activity| activity.preference }
+
     @placed_activities = []
     @selected_activities.each do |activity|
       @busys_seperated = seperate_busys_by_date(@busys)
       @availibilities = availibilities(@busys_seperated)
       @availibilities += free_day_availibilities(@busys, 8, 22)
       filtered = filtered_by_duration(@availibilities, 30)
-      @a = all_slot(filtered, 30, activity)
-      @b = all_slot_b(filtered, 30, activity)
-      @c = mix(@a, @b)
-      @placed_activities << @c.first
-      @busys << @c.first
+      @a = all_possibilities_in_all_availibilities_interval(filtered, 30, activity)
+      @b = all_possibilities_in_all_availibilities_duration(filtered, 30, activity)
+      @all_possibilities_insert_event = mix(@a, @b)
+      @placed_activities << @all_possibilities_insert_event.first
+      @busys << @all_possibilities_insert_event.first
       # should implement the insert event call for api here???????
       @new_busys = @busys.sort_by!{ |busy| busy[:start] }
     end
@@ -193,14 +197,14 @@ class CalendarsController < ApplicationController
     event
   end
 
-  def event_h(f, duration_input)
+  def event_hash(f, duration_input)
     { start: f[:start], end: f[:start] + duration_input.minute }
   end
 
   # find all posibilities in one slot
   # find all posibilities to insert events by moving forward in interval
-  def each_slot(f, duration_input, activity)
-    event = event_h(f, duration_input) # => { start: , end:  }
+  def all_possibilities_in_each_availibility_interval(f, duration_input, activity)
+    event = event_hash(f, duration_input) # => { start: , end:  }
     events = []
     while event[:end] < f[:end]
       if all_event_weathers_good?(event_weathers(event), activity)
@@ -211,8 +215,8 @@ class CalendarsController < ApplicationController
     events # => [...]
   end
   # find all posibilities to insert events by movinfg forward in duration
-  def each_slot_b(f, duration_input, activity)
-    event = event_h(f, duration_input) # => { start: , end:  }
+  def all_possibilities_in_each_availibility_duration(f, duration_input, activity)
+    event = event_hash(f, duration_input) # => { start: , end:  }
     events = []
     while event[:end] < f[:end]
       if all_event_weathers_good?(event_weathers(event), activity)
@@ -225,24 +229,26 @@ class CalendarsController < ApplicationController
 
 
   # find all free time slot that is suitable for acvity
-  def all_slot(filtered, duration_input, activity)
+  def all_possibilities_in_all_availibilities_interval(filtered, duration_input, activity)
     all = []
     filtered.each do |f|
-      all << each_slot(f, duration_input, activity) unless each_slot(f, duration_input, activity).empty?
+      each = all_possibilities_in_each_availibility_interval(f, duration_input, activity)
+      all <<  each unless each.empty?
     end
     all.flatten # => [[..], [...] ]
   end
 
-  def all_slot_b(filtered, duration_input, activity)
+  def all_possibilities_in_all_availibilities_duration(filtered, duration_input, activity)
     all = []
     filtered.each do |f|
-      all << each_slot_b(f, duration_input, activity) unless each_slot_b(f, duration_input, activity).empty?
+      each = all_possibilities_in_each_availibility_duration(f, duration_input, activity)
+      all << each unless each.empty?
     end
     all.flatten # => [[..], [...] ]
   end
 
-  def mix(all_slot, all_slot_b)
-    (all_slot + all_slot_b).uniq.sort_by! { |e| e[:start]}# e => hash
+  def mix(interval, duration)
+    (interval + duration).uniq.sort_by! { |e| e[:start] } # e => hash
   end
 
   # another big challenge

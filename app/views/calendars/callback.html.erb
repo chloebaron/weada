@@ -8,11 +8,11 @@
 <% end %>
 
 
-<h2>After</h2>
-<p><%= @busys.count %></p>
-<% @busys.each do |busys|%>
-  <p>Strat: <%= busys[:start] %></p>
-  <p>End: <%= busys[:end] %></p>
+<h2>Placed Activities</h2>
+<p><%= @placed_activities.count %></p>
+<% @placed_activities.each do |placed_activity|%>
+  <p>Strat: <%= placed_activity[:start] %></p>
+  <p>End: <%= placed_activity[:end] %></p>
 <% end %>
 
 
