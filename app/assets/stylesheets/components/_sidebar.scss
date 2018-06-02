@@ -1,19 +1,38 @@
 .sidebar{
-  width: 370px;
+  flex: 0 0;
+  width: 39%;
   background: white;
-  height: 100vh;
+  height: calc(100vh - 70px);
   position: absolute;
-  top: 70px;
   right: 0;
+  background: linear-gradient(179.42deg, rgba(80, 227, 142, 0) 45.01%,
+    rgba(81, 187, 125, 0.295) 72.81%), rgba(56, 165, 152, 0.75);
 }
-
 
 .form-design{
   width: 100%;
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
 }
 
-.wrapper {
-  display: flex;
+.btn-save {
+  padding: 15px;
+  box-shadow: none;
+  background: rgba(255,255,255, 0.4);
+  width: 100%;
+  bottom: 0;
+  position: absolute;
+  input {
+    width: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    color: white;
+  }
+  :hover {
+
+  }
 }
+
