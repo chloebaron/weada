@@ -14,7 +14,7 @@
   </div>
 </div>
 <div class="sidebar">
- <%= form_tag('/user_events', {:method => :post, :class => 'form-design' }) do %>
+ <%= form_tag('/redirect', {:method => :post, :class => 'form-design' }) do %>
         <!-- # iterating over each activity -->
     <% @activities.each do |activity| %>
         <div class="card hidden activity-wrapper-<%= activity.id %>" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.2));">

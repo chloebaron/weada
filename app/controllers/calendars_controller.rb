@@ -22,38 +22,40 @@ class CalendarsController < ApplicationController
     @events = service.list_events("primary").items
     @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
     # Not necessary to rename, but rename can be more clear
-
-    # filtered = filtered_by_duration(@availibilities)
+    params = { user_events: {"2"=>"60", "3"=>"30", "4"=>"30", "5"=>"30", "6"=>"30", "7"=>"120", "8"=>"30", "9"=>"30", "10"=>"30", "11"=>"30"},
+    activity_ids: ["6", "2", "7"]}
     # , duration_input when implemented properly
-
-
-    # @busys_seperated = seperate_busys_by_date(@busys)
-    # @availibilities = availibilities(@busys_seperated)
-    # @availibilities += free_day_availibilities(@busys, 8, 22)
-    # filtered = filtered_by_duration(@availibilities, 30)
-
-    @selected_activities = [Activity.find(4)]
+    @selected_activities = []
+    params[:activity_ids].each do |id|
+      @selected_activities << { activity: Activity.find(id), duration: params[:user_events]["#{id}"].to_i }
+    end
+    # @selected_activities = [Activity.find(3), Activity.find(4)]
     @new_busys = @busys
     # how can we define the number for the most preferred one?
     #  for example, 1 is the most, 3, is the least???? Or in reverse
-    @selected_activities.sort_by! { |activity| activity.preference }
-
+    @selected_activities.sort_by! { |activity| activity[:activity].preference }
     @placed_activities = []
     @selected_activities.each do |activity|
       @new_busys_seperated = seperate_busys_by_date(@new_busys)
       @availibilities = availibilities(@new_busys_seperated)
       @availibilities += free_day_availibilities(@new_busys, 8, 22)
-      filtered = filtered_by_duration(@availibilities, 100)
+      filtered = filtered_by_duration(@availibilities, activity[:duration])
       if filtered.empty?
-        @placed_activities << recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity)
+        placed_activity_hash = recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity)
+        placed_activity_hash[:activity] = activity[:activity]
+        @placed_activities << placed_activity_hash
       else
-        @a = all_possibilities_in_all_availibilities_interval(filtered, 100, activity)
-        @b = all_possibilities_in_all_availibilities_duration(filtered, 100, activity)
+        @a = all_possibilities_in_all_availibilities_interval(filtered, activity[:duration], activity[:activity])
+        @b = all_possibilities_in_all_availibilities_duration(filtered, activity[:duration], activity[:activity])
         @all_possibilities_insert_event = mix(@a, @b)
         if @all_possibilities_insert_event.empty?
-          @placed_activities << recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity) unless recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity).nil?
+          placed_activity_hash = recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity) unless recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity).nil?
+          placed_activity_hash[:activity] = activity[:activity]
+          @placed_activities << placed_activity_hash
         else
-          @placed_activities << @all_possibilities_insert_event.first
+          placed_activity_hash = @all_possibilities_insert_event.first
+          placed_activity_hash[:activity] = activity[:activity]
+          @placed_activities << placed_activity_hash
         end
         @new_busys << @all_possibilities_insert_event.first
         # should implement the insert event call for api here???????
@@ -62,15 +64,16 @@ class CalendarsController < ApplicationController
     end
 
     # create_weada_calendar(client)
-    user_weada_event =  UserEvent.create!(
-
-      start_time: @placed_activities.first[:start],
-      end_time: @placed_activities.first[:end],
-      activity_id: 4,
-      user_id: User.first.id,
-      duration: calculate_time(@placed_activities.first)
+    user_weada_events = @placed_activities.map do |placed_activity|
+    UserEvent.create!(
+      start_time: placed_activity[:start],
+      end_time: placed_activity[:end],
+      activity_id: placed_activity[:activity].id,
+      user_id: current_user.id,
+      duration: calculate_time({ start: placed_activity[:start], end: placed_activity[:end]})
        )
-      insert_weada_event(user_weada_event, client)
+    end
+    user_weada_events.each { |e| insert_weada_event(e, client) }
     # redirect_to calendars_url
   end
 
