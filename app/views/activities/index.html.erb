@@ -1,37 +1,39 @@
-
 <div class="wrapper">
   <div class="card-container">
-  <div class="container">
-    <h1>Choose your activities for the week!</h1>
-    <div class="row">
-      <!-- # Form for new_user_event -->
+    <!-- <div class="container"> -->
+      <h2>Choose your activities for the week!</h2>
+      <div class="row">
+        <% @activities.each do |activity| %>
+        <div class="col-xs-12 col-sm-6 col-md-4">
+         <div class="<%= activity.id %>" onclick="handleEvent(event, this)">
+
+          <div class="card activity" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.2));">
+            <div class="activity-card-name">
+              <%= activity.name %>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="sidebar">
+   <%= form_tag('/user_events', {:method => :post, :class => 'form-design' }) do %>
+          <!-- # iterating over each activity -->
       <% @activities.each do |activity| %>
-          <div class="<%= activity.id %>" onclick="handleEvent(event, this)">
-            <div class="card" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.2));">
+          <div class="card hidden activity-wrapper-<%= activity.id %>" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.2));">
+            <%# check_box_tag 'activity_ids[]', activity.id %>
+            <%# image_tag "#{activity.name}.png" %>
+            <input type="checkbox" name="activity_ids[]" id="<%= activity.id %>" value="<%= activity.id %>" class="hidden">
+            <%= select(:user_events, activity.id, [['30', 30], ['60', 60], ['90', 90], ['120', 120]]) %>
+            <div class="card-name">
               <%= activity.name %>
             </div>
           </div>
       <% end %>
-
-  </div>
-    </div>
-  </div>
-</div>
-<div class="sidebar">
- <%= form_tag('/user_events', {:method => :post, :class => 'form-design' }) do %>
-        <!-- # iterating over each activity -->
-    <% @activities.each do |activity| %>
-        <div class="card hidden activity-wrapper-<%= activity.id %>" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.2));">
-          <%# check_box_tag 'activity_ids[]', activity.id %>
-          <%# image_tag "#{activity.name}.png" %>
-          <input type="checkbox" name="activity_ids[]" id="<%= activity.id %>" value="<%= activity.id %>" class="hidden">
-          <%= select(:user_events, activity.id, [['30', 30], ['60', 60], ['90', 90], ['120', 120]]) %>
-          <div class="card-name">
-            <%= activity.name %>
-          </div>
-        </div>
+      <div class="btn btn-save"><%= submit_tag 'Create Schedule' %></div>
     <% end %>
-    <div><%= submit_tag 'Save' %></div>
-  <% end %>
+  </div>
 </div>
-</div>
+
