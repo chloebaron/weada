@@ -21,18 +21,14 @@ class CalendarsController < ApplicationController
 
     @events = service.list_events("primary").items
     @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
-    # Not necessary to rename, but rename can be more clear
+    raise
     params = { user_events: {"2"=>"60", "3"=>"30", "4"=>"30", "5"=>"30", "6"=>"30", "7"=>"120", "8"=>"30", "9"=>"30", "10"=>"30", "11"=>"30"},
     activity_ids: ["6", "2", "7"]}
-    # , duration_input when implemented properly
     @selected_activities = []
     params[:activity_ids].each do |id|
       @selected_activities << { activity: Activity.find(id), duration: params[:user_events]["#{id}"].to_i }
     end
-    # @selected_activities = [Activity.find(3), Activity.find(4)]
     @new_busys = @busys
-    # how can we define the number for the most preferred one?
-    #  for example, 1 is the most, 3, is the least???? Or in reverse
     @selected_activities.sort_by! { |activity| activity[:activity].preference }
     @placed_activities = []
     @selected_activities.each do |activity|
@@ -58,7 +54,6 @@ class CalendarsController < ApplicationController
           @placed_activities << placed_activity_hash
         end
         @new_busys << @all_possibilities_insert_event.first
-        # should implement the insert event call for api here???????
         @new_busys.sort_by!{ |busy| busy[:start] }
       end
     end
