@@ -21,7 +21,7 @@ class CalendarsController < ApplicationController
 
     @events = service.list_events("primary").items
     @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
-    raise
+    convert_time_zone(@busys)
     params = { user_events: {"2"=>"60", "3"=>"30", "4"=>"30", "5"=>"30", "6"=>"30", "7"=>"120", "8"=>"30", "9"=>"30", "10"=>"30", "11"=>"30"},
     activity_ids: ["6", "2", "7"]}
     @selected_activities = []
@@ -106,6 +106,14 @@ class CalendarsController < ApplicationController
 
 
 ###################################--METHODS FOR FINDING AVAILABLE TIME--#################################
+   def convert_time_zone(busys)
+    busys.each do |busy|
+      time_zone = ActiveSupport::TimeZone.new("Eastern Time (US & Canada)")
+      busy[:start] = busy[:start].to_time.in_time_zone(time_zone).to_datetime
+      busy[:end] = busy[:end].to_time.in_time_zone(time_zone).to_datetime
+    end
+   end
+
   def availibilities(busys)
     availibilities = []
     busys.each do |busy|
