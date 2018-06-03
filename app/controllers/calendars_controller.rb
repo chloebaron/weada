@@ -21,17 +21,18 @@ class CalendarsController < ApplicationController
     free_busy_weada = get_free_busy_weada(service)
     # @events = service.list_events("primary").items
     @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
+    byebug
     @busys_weada = free_busy_weada.calendars["Weada"].busy.map { |busy| { start: busy.start, end: busy.end } }
     convert_time_zone(@busys)
     convert_time_zone(@busys_weada)
 
-    params = { user_events: {"2"=>"200", "3"=>"30", "4"=>"30", "5"=>"30", "6"=>"200", "7"=>"120", "8"=>"30", "9"=>"30", "10"=>"30", "11"=>"30"},
+    params = { user_events: {"2"=>"100", "3"=>"30", "4"=>"30", "5"=>"30", "6"=>"100", "7"=>"120", "8"=>"30", "9"=>"30", "10"=>"30", "11"=>"30"},
     activity_ids: ["6", "2", "7"]}
     @selected_activities = []
     params[:activity_ids].each do |id|
       @selected_activities << { activity: Activity.find(id), duration: params[:user_events]["#{id}"].to_i }
     end
-    @new_busys = @busys
+    @new_busys = (@busys + @busys_weada).sort_by! { |busy| busy[:start] }
     @selected_activities.sort_by! { |activity| activity[:activity].preference }
     @placed_activities = []
     @selected_activities.each do |activity|
@@ -212,7 +213,6 @@ class CalendarsController < ApplicationController
 
   def all_event_weathers_good?(event_weathers_a, activity)
     event_weathers_a.all? { |e| activity.permitted_under_weather(e) }
-    true
   end
 
 
@@ -312,39 +312,9 @@ class CalendarsController < ApplicationController
     all_in_one_availibility
   end
 
-  # def move_a(interval_time_slot, availibility)
-  #   interval_time_slot[:start] = interval_time_slot[:end]
-  #   interval_time_slot[:end] += 1.hour
-
-  # end
-
-  # def move_b(interval_time_slot, availibility)
-  #   interval_time_slot[:start] = interval_time_slot[:end]
-  #   interval_time_slot[:end] = availibility[:end]
-  #   interval_time_slot
-  # end
-
-  # def merge_all_squent_suitable_time_slots_in_each_availibility(suitable_interval_time_slots)
-  #   merged_all_squent_suitable_time_slots = []
-  #     suitable_interval_time_slots.each_with_index do |e, index|
-  #       byebug
-  #       if !suitable_interval_time_slots[index + 1].nil?
-  #         if e[:end] >= suitable_interval_time_slots[index + 1][:start]
-  #           e[:end] = suitable_interval_time_slots[index + 1][:end]
-  #           merged_all_squent_suitable_time_slots << e
-  #         else
-  #           merged_all_squent_suitable_time_slots << e
-  #         end
-  #       end
-  #     end
-  #     merged_all_squent_suitable_time_slots
-
-  # end
-
   def merge_all_squent_suitable_time_slots_in_each_availibility(suitable_interval_time_slots)
     i = 0
     until suitable_interval_time_slots[i + 1].nil?
-      # byebug
       if suitable_interval_time_slots[i][:end] >= suitable_interval_time_slots[i + 1][:start]
         suitable_interval_time_slots[i][:end] = suitable_interval_time_slots[i + 1][:end]
         suitable_interval_time_slots.delete_at(i + 1)
@@ -372,15 +342,6 @@ class CalendarsController < ApplicationController
   def find_longest_suitale_time_slot_from_one_merged(merged_all_squent_suitable_time_slots)
     merged_all_squent_suitable_time_slots.sort_by! { |e| e[:end] - e[:start] }.last
   end
-
-
-
-
-  # another big challenge
-  # what if there is no suitable slot?
-  # We might ajust the duration to see if there is any suitable slot
-
-
 
   # rescue Google::Apis::AuthorizationError
   # response = client.refresh!
@@ -437,6 +398,7 @@ class CalendarsController < ApplicationController
     free_busy_request_item.id = "Weada"
     free_busy_request.items = [ free_busy_request_item ]
     calendar_service.query_freebusy(free_busy_request)
+    byebug
   end
 
   def client_options
