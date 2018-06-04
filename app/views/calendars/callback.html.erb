@@ -6,15 +6,11 @@
 <h2>Placed Activities</h2>
 <p><%= @selected_activities.count %></p>
 <% @selected_activities.each do |selected_activity|%>
-  <p>Activity: <%= selected_activity[:activity].name %></p>
+  <p>Activity: <%= selected_activity.activity.name %></p>
   <p>Strat: <%= selected_activity[:start_time] %></p>
   <p>End: <%= selected_activity[:end_time] %></p>
 <% end %>
 
 
-<h2>Availibilities</h2>
-<p><%= @availibilities.count %></p>
-<% @availibilities.each do |availibilities|%>
-  <p>Strat: <%= availibilities[:start] %></p>
-  <p>End: <%= availibilities[:end] %></p>
-<% end %>
+
+
