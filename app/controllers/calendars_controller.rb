@@ -18,64 +18,77 @@ class CalendarsController < ApplicationController
     service.authorization = client
 
     free_busy = get_free_busy(service)
+    debugger
     free_busy_weada = get_free_busy_weada(service)
     # @events = service.list_events("primary").items
     @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
-    byebug
     @busys_weada = free_busy_weada.calendars["Weada"].busy.map { |busy| { start: busy.start, end: busy.end } }
     convert_time_zone(@busys)
     convert_time_zone(@busys_weada)
 
-    params = { user_events: {"2"=>"100", "3"=>"30", "4"=>"30", "5"=>"30", "6"=>"100", "7"=>"120", "8"=>"30", "9"=>"30", "10"=>"30", "11"=>"30"},
-    activity_ids: ["6", "2", "7"]}
-    @selected_activities = []
-    params[:activity_ids].each do |id|
-      @selected_activities << { activity: Activity.find(id), duration: params[:user_events]["#{id}"].to_i }
-    end
+    # params = { user_events: {"2"=>"100", "3"=>"30", "4"=>"30", "5"=>"30", "6"=>"100", "7"=>"120", "8"=>"30", "9"=>"30", "10"=>"30", "11"=>"30"},
+    # activity_ids: ["6", "2", "7"]}
+    # @selected_activities = []
+    # params[:activity_ids].each do |id|
+    #   @selected_activities << { activity: Activity.find(id), duration: params[:user_events]["#{id}"].to_i }
+    # end
     @new_busys = (@busys + @busys_weada).sort_by! { |busy| busy[:start] }
-    @selected_activities.sort_by! { |activity| activity[:activity].preference }
+
+    @selected_activities = UserEvent.joins(:activity).where(status: 0).order("activities.preference desc")
+
+    # @selected_activities.sort_by! { |user_event| user_event.activity.preference }
+
+
     @placed_activities = []
-    @selected_activities.each do |activity|
+    @selected_activities.each do |user_event|
       @new_busys.sort_by!{ |busy| busy[:start] }
       @new_busys_seperated = seperate_busys_by_date(@new_busys)
       @availibilities = availibilities(@new_busys_seperated)
       @availibilities += free_day_availibilities(@new_busys, 8, 22)
-      # byebug
-      filtered = filtered_by_duration(@availibilities, activity[:duration])
+      filtered = filtered_by_duration(@availibilities, user_event.duration)
       if filtered.empty?
-        placed_activity_hash = recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity)
-        placed_activity_hash[:activity] = activity[:activity]
-        @placed_activities << placed_activity_hash
+        # placed_activity_hash = recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity)
+        # placed_activity_hash[:activity] = user_event.activity
+        # @placed_activities << placed_activity_hash
+        time_slot = recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity)
+        user_event.update(duration: calculate_time(time_slot))
+        user_event.update(start_time: time_slot[:start], end_time: time_slot[:end], status: 1)
         @new_busys << recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity)
+
       else
-        @a = all_possibilities_in_all_availibilities_interval(filtered, activity[:duration], activity[:activity])
-        @b = all_possibilities_in_all_availibilities_duration(filtered, activity[:duration], activity[:activity])
+        @a = all_possibilities_in_all_availibilities_interval(filtered, user_event.duration, user_event.activity)
+        @b = all_possibilities_in_all_availibilities_duration(filtered, user_event.duration, user_event.activity)
         @all_possibilities_insert_event = mix(@a, @b)
         if @all_possibilities_insert_event.empty?
-          placed_activity_hash = recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity) unless recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity).nil?
-          placed_activity_hash[:activity] = activity[:activity]
-          @placed_activities << placed_activity_hash
+          # placed_activity_hash = recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity) unless recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity).nil?
+          # placed_activity_hash[:activity] = user_event.activity
+          # @placed_activities << placed_activity_hash
+          time_slot = recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity) unless recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity).nil?
+          user_event.update(duration: calculate_time(time_slot))
+          user_event.update(start_time: time_slot[:start], end_time: time_slot[:end], status: 1)
         else
-          placed_activity_hash = @all_possibilities_insert_event.first
-          placed_activity_hash[:activity] = activity[:activity]
-          @placed_activities << placed_activity_hash
+          # placed_activity_hash = @all_possibilities_insert_event.first
+          # placed_activity_hash[:activity] = user_event.activity
+          # @placed_activities << placed_activity_hash
+          time_slot = @all_possibilities_insert_event.first
+          user_event.update(duration: calculate_time(time_slot))
+          user_event.update(start_time: time_slot[:start], end_time: time_slot[:end], status: 1)
         end
         @new_busys << @all_possibilities_insert_event.first
       end
     end
 
-
-    user_weada_events = @placed_activities.map do |placed_activity|
-    UserEvent.create!(
-      start_time: placed_activity[:start],
-      end_time: placed_activity[:end],
-      activity_id: placed_activity[:activity].id,
-      user_id: current_user.id,
-      duration: calculate_time({ start: placed_activity[:start], end: placed_activity[:end]})
-       )
-    end
+    # user_weada_events = @placed_activities.map do |placed_activity|
+    # UserEvent.create!(
+    #   start_time: placed_activity[:start],
+    #   end_time: placed_activity[:end],
+    #   activity_id: placed_activity.activity.id,
+    #   user_id: current_user.id,
+    #   duration: calculate_time({ start: placed_activity[:start], end: placed_activity[:end]})
+    #    )
+    # end
     create_weada_calendar(client) unless list_calendars(client).any? { |list| list.summary.downcase == "weada" }
-    user_weada_events.each { |e| insert_weada_event(e, client) }
+    @selected_activities.each { |e| insert_weada_event(e, client) }
     # redirect_to calendars_url
   end
 
@@ -113,6 +126,11 @@ class CalendarsController < ApplicationController
 
 
 ###################################--METHODS FOR FINDING AVAILABLE TIME--#################################
+
+   def update_user_event(user_event, placed_activity_hash)
+
+   end
+
    # It will dynamically change the time zone between EST and EDT
    def convert_time_zone(busys)
     busys.each do |busy|
@@ -387,6 +405,7 @@ class CalendarsController < ApplicationController
     free_busy_request_item.id = "primary"
     free_busy_request.items = [ free_busy_request_item ]
     free_busy = calendar_service.query_freebusy(free_busy_request)
+    byebug
   end
 
   def get_free_busy_weada(calendar_service)
@@ -398,7 +417,6 @@ class CalendarsController < ApplicationController
     free_busy_request_item.id = "Weada"
     free_busy_request.items = [ free_busy_request_item ]
     calendar_service.query_freebusy(free_busy_request)
-    byebug
   end
 
   def client_options

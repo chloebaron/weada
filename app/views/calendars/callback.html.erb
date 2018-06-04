@@ -1,18 +1,14 @@
 <h1>You're here</h1>
 
-<% @new_busys_seperated.each do |new_busy| %>
-  <% new_busy.each do |b| %>
-    <p> <%= b[:start] %></p>
-    <p> <%= b[:end] %></p>
-    <% end %>
-<% end %>
+
 
 
 <h2>Placed Activities</h2>
-<p><%= @placed_activities.count %></p>
-<% @placed_activities.each do |placed_activity|%>
-  <p>Strat: <%= placed_activity[:start] %></p>
-  <p>End: <%= placed_activity[:end] %></p>
+<p><%= @selected_activities.count %></p>
+<% @selected_activities.each do |selected_activity|%>
+  <p>Activity: <%= selected_activity[:activity].name %></p>
+  <p>Strat: <%= selected_activity[:start_time] %></p>
+  <p>End: <%= selected_activity[:end_time] %></p>
 <% end %>
 
 
