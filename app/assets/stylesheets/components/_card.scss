@@ -10,35 +10,31 @@
   }
 }
 
-
 .card {
-  height: 175px;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
-  color: white;
+  height: 100px;
+  font-weight: bolder;
+  background-color: white;
   position: relative;
-  // margin: 10px;
+  margin: 10px;
   text-align: center;
-  // padding: 5px;
-  // display: flex;
-  // justify-content: center;
-  // align-items: center;
-  // width:100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 75%;
   margin: 10px 0;
-
+  border-radius: 5px;
 }
 
-.card .activity {
+.card.activity {
   height: 175px;
-  color: white;
+  width: 100%;
   position: relative;
-
   text-align: center;
-
   display: flex;
   justify-content: center;
   align-items: center;
+  border-radius: 2px;
 }
-
 
 #activity_ids_ {
   position: absolute;
@@ -49,7 +45,7 @@
 .activity-card-name {
   position: absolute;
   width: 100%;
-  font-weight: lighter;
+  font-weight: bold;
 }
 
 // .card-link {

@@ -15,70 +15,80 @@ User.create!(
 
 {
   "run" => {
-    name: "Go for a run",
+    name: "run",
+    description: "Go for a Run",
     sunny_required: false,
     warm_required: false,
     dry_required: true,
     calm_required: true
   },
   "park" => {
-    name: "Spend time in the park",
+    name: "park",
+    description: "Spend Time in the Park",
     sunny_required: true,
     warm_required: true,
     dry_required: true,
     calm_required: true
   },
   "museum" => {
-    name: "Go to a Museum",
+    name: "museum",
+    description: "Go to a Museum",
     sunny_required: false,
     warm_required: false,
     dry_required: false,
     calm_required: false,
   },
   "bbq" => {
-    name: "Have a Barbeque",
+    name: "bbq",
+    description: "Have a Barbeque",
     sunny_required: false,
     warm_required: true,
     dry_required: true,
     calm_required: true
   },
   "yoga" => {
-    name: "Do a Yoga video",
+    name: "yoga",
+    description: "Do a Yoga Video",
     sunny_required: false,
     warm_required: false,
     dry_required: false,
     calm_required: false
   },
   "cinema" => {
-    name: "Go to the Cinema",
+    name: "cinema",
+    description: "Go to the Cinema",
     sunny_required: false,
     warm_required: false,
     dry_required: false,
     calm_required: false
   },
   "drinks" => {
-    name: "Drinks on a Terrace",
+    name: "drinks",
+    description: "Drinks on a Terrace",
     sunny_required: true,
     warm_required: true,
     dry_required: true,
     calm_required: true
   },
   "read" => {
-    name: "Read a Book",
+    name: "read",
+    description: "Read a Book",
     sunny_required: false,
     warm_required: false,
     dry_required: false,
     calm_required: false
   },
   "gallery" => {
-    name: "Check out an Art Gallery",
+    name: "gallery",
+    description: "Check out an Art Gallery",
     sunny_required: false,
     warm_required: false,
     dry_required: false,
     calm_required: false
   },
-  "Sit in a cafe" => {
-    name: "Sit in a cafe",
+  "cafe" => {
+    name: "cafe",
+    description: "Sit in a Cafe",
     sunny_required: false,
     warm_required: false,
     dry_required: false,
