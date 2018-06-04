@@ -27,13 +27,11 @@
               <%# check_box_tag 'activity_ids[]', activity.id %>
               <%# image_tag "#{activity.name}.png" %>
               <input type="checkbox" name="activity_ids[]" id="<%= activity.id %>" value="<%= activity.id %>" class="hidden">
-
-              <div class="card-name <%= activity.name %>-color">
-                <%= activity.description %>
-              </div>
-              <div class="duration-select">
-              <%= select(:user_events, activity.id, [['30', 30], ['60', 60], ['90', 90], ['120', 120]]) %>
-              </div>
+            <div class="card-name <%= activity.name %>-color">
+              <%= activity.description %>
+            </div>
+            <div class="duration-select">
+              <%= select(:user_events, activity.id, [['30', 30], ['60', 60], ['90', 90], ['120', 120]], include_blank: true) %>
             </div>
         <% end %>
         <div class="btn btn-save"><%= submit_tag 'Create Schedule' %></div>
