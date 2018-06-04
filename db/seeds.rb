@@ -85,14 +85,6 @@ User.create!(
     warm_required: false,
     dry_required: false,
     calm_required: false
-  },
-  "cafe" => {
-    name: "cafe",
-    description: "Sit in a Cafe",
-    sunny_required: false,
-    warm_required: false,
-    dry_required: false,
-    calm_required: false
   }
 }.values.each do |e|
  Activity.create(e)
