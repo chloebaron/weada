@@ -1,12 +1,14 @@
-<div class="wrapper">
-  <div class="container card-container">
-    <!-- <div class="container"> -->
+<div class="activities-wrapper wrapper">
+  <div class="card-container">
       <h2>Choose your activities for the week!</h2>
       <div class="row">
         <% @activities.each do |activity| %>
         <div class="col-xs-12 col-sm-6 col-md-4">
          <div class="<%= activity.id %>" onclick="handleEvent(event, this)">
           <div class="card activity">
+            <div class="icon">
+              <i class="fa fa-<%= @icons[activity.name.to_sym] %> <%= activity.name %>-color  fa-lg"></i>
+            </div>
             <div class="activity-card-name <%= activity.name %>-color">
               <%= activity.description %>
             </div>
@@ -18,22 +20,22 @@
   </div>
 
   <div id="sidebar">
-   <%= form_tag('/user_events', {:method => :post, :class => 'form-design' }) do %>
-      <% @activities.each do |activity| %>
-          <div class="card hidden activity-wrapper-<%= activity.id %>"
-            <%# check_box_tag 'activity_ids[]', activity.id %>
-            <%# image_tag "#{activity.name}.png" %>
-            <input type="checkbox" name="activity_ids[]" id="<%= activity.id %>" value="<%= activity.id %>" class="hidden">
-
+    <%= form_tag('/user_events', {:method => :post, :class => 'form-design' }) do %>
+      <div class="selected-activities-container">
+        <% @activities.each do |activity| %>
+            <div class="card hidden activity-wrapper-<%= activity.id %>"
+              <%# check_box_tag 'activity_ids[]', activity.id %>
+              <%# image_tag "#{activity.name}.png" %>
+              <input type="checkbox" name="activity_ids[]" id="<%= activity.id %>" value="<%= activity.id %>" class="hidden">
             <div class="card-name <%= activity.name %>-color">
               <%= activity.description %>
             </div>
             <div class="duration-select">
               <%= select(:user_events, activity.id, [['30', 30], ['60', 60], ['90', 90], ['120', 120]], include_blank: true) %>
             </div>
-          </div>
-      <% end %>
-      <div class="btn btn-save"><%= submit_tag 'Create Schedule' %></div>
+        <% end %>
+        <div class="btn btn-save"><%= submit_tag 'Create Schedule' %></div>
+      </div>
     <% end %>
   </div>
 </div>

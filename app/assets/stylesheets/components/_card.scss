@@ -26,14 +26,23 @@
 }
 
 .card.activity {
+  transition: all 0.25s ease-in-out;
   height: 175px;
   width: 100%;
   position: relative;
   text-align: center;
   display: flex;
   justify-content: center;
+  flex-direction: column;
   align-items: center;
   border-radius: 2px;
+  padding: 0 10px;
+  box-shadow: 0px 0px 35px rgba(100, 100, 100, 0.1);
+
+  &:hover {
+    transform: scale(1.1);
+    cursor: pointer;
+  }
 }
 
 #activity_ids_ {
@@ -42,8 +51,14 @@
   left: 10px;
 }
 
+.icon {
+  // position: absolute;
+  font-size: 32px;
+  // top: 30px;
+}
+
 .activity-card-name {
-  position: absolute;
+
   width: 100%;
   font-weight: bold;
 }
@@ -58,9 +73,9 @@
 //   background: black;
 //   opacity: 0;
 // }
-.card-link:hover {
-  opacity: 0.1;
-}
+// .card-link &:hover {
+//   opacity: 0.1;
+// }
 
 .h1 {
   font-size: 48;
