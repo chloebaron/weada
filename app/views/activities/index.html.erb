@@ -29,7 +29,7 @@
               <%= activity.description %>
             </div>
             <div class="duration-select">
-            <%= select(:user_events, activity.id, [['30', 30], ['60', 60], ['90', 90], ['120', 120]]) %>
+              <%= select(:user_events, activity.id, [['30', 30], ['60', 60], ['90', 90], ['120', 120]], include_blank: true) %>
             </div>
           </div>
       <% end %>
