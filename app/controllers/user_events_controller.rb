@@ -7,9 +7,11 @@ class UserEventsController < ApplicationController
   end
 
   def create
+    # Destroy last pending user_events records
+    UserEvent.where(status: 0).destroy_all
     params[:activity_ids].each do |activity_id|
       activity = Activity.find(activity_id)
-      UserEvent.create(user: current_user, activity: activity, status: 0)
+      UserEvent.create(user: current_user, activity: activity, status: 0, duration: params[:user_events][:activity_id].to_i)
     end
 
     redirect_to dashboard_path
