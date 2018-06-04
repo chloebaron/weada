@@ -1,6 +1,4 @@
 class CalendarsController < ApplicationController
-  before_action :get_client_session, only: [:list_calendars, :create_weada_calendar]
-
   def redirect
     client = Signet::OAuth2::Client.new(client_options)
     redirect_to client.authorization_uri.to_s
@@ -145,10 +143,10 @@ class CalendarsController < ApplicationController
     ((availibility[:end] - availibility[:start]) * 24 * 60).to_f # => minutes
   end
 
-  def filtered_by_duration(availibilities, duration_input) # find the free times that are longer than the user given duration for an activity
-    availibilities.flatten.select do |availibility|
+  def filtered_by_duration(user_availibilities, duration_input) # find the free times that are longer than the user given duration for an activity
+    user_availibilities.flatten.select do |availibility|
       calculate_time(availibility) >= duration_input
-    end
+    end # => array of availabilites longer than or equal to the length of an activity
   end
 
 
@@ -243,7 +241,7 @@ class CalendarsController < ApplicationController
     all.flatten # => [[..], [...] ]
   end
 
-  def mix(interval, duration)
+  def combine_possibilities(interval, duration)
     (interval + duration).uniq.sort_by! { |event| event[:start] } # e => hash
   end
 
@@ -382,8 +380,9 @@ class CalendarsController < ApplicationController
     free_busy_weada = get_free_busy_weada(service, weada_calendar.id)
     # @events = service.list_events("primary").items
 
-    #busy items from primary
+    # busy items from primary
     @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
+
     # if weada calendar exists, get busy items from that, else just don't
     @busys_weada = free_busy_weada.calendars[weada_calendar.id].busy.map { |busy| { start: busy.start, end: busy.end } }
 
@@ -410,10 +409,6 @@ class CalendarsController < ApplicationController
 
     # @selected_activities.sort_by! { |user_event| user_event.activity.preference }
 
-    # prepare an array to collect chosen activities
-    @placed_activities = []
-
-
     @selected_activities.each do |user_event|
       @new_busys.sort_by!{ |busy| busy[:start] }
 
@@ -437,20 +432,20 @@ class CalendarsController < ApplicationController
           # @placed_activities << placed_activity_hash
         # <--------------------------------> #
 
-        time_slot = recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity)
-
+        time_slot = recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, user_event.activity)
 
         # user_event.update(duration: calculate_time(time_slot))
 
         # update the user event
         user_event.update(start_time: time_slot[:start], end_time: time_slot[:end], duration: calculate_time(time_slot), status: 1)
 
-
-        @new_busys << recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity)
+        # Add the longest possuble time slot for that activity to @new_busys, for updating the calendar
+        @new_busys << recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, user_event.activity)
       else
-        @a = all_possibilities_in_all_availibilities_interval(filtered, user_event.duration, user_event.activity)
-        @b = all_possibilities_in_all_availibilities_duration(filtered, user_event.duration, user_event.activity)
-        @all_possibilities_insert_event = mix(@a, @b)
+        @interval_slot_possiblilities = all_possibilities_in_all_availibilities_interval(filtered, user_event.duration, user_event.activity)
+        @duration_slot_possiblilities = all_possibilities_in_all_availibilities_duration(filtered, user_event.duration, user_event.activity)
+        @all_possibilities_insert_event = combine_possibilities(@interval_slot_possiblilities, @duration_slot_possiblilities)
+
         if @all_possibilities_insert_event.empty?
 
           # OLD CODE #
@@ -459,7 +454,10 @@ class CalendarsController < ApplicationController
             # @placed_activities << placed_activity_hash
           # <--------------------------------> #
 
-          time_slot = recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity) unless recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity).nil?
+          time_slot = unless recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, user_event.activity).nil?
+            recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, user_event.activity)
+          end
+
           user_event.update(duration: calculate_time(time_slot))
           user_event.update(start_time: time_slot[:start], end_time: time_slot[:end], status: 1)
         else
@@ -478,16 +476,20 @@ class CalendarsController < ApplicationController
       end
     end
 
-    # user_weada_events = @placed_activities.map do |placed_activity|
-    # UserEvent.create!(
-    #   start_time: placed_activity[:start],
-    #   end_time: placed_activity[:end],
-    #   activity_id: placed_activity.activity.id,
-    #   user_id: current_user.id,
-    #   duration: calculate_time({ start: placed_activity[:start], end: placed_activity[:end]})
-    #    )
-    # end
-    create_weada_calendar(client) unless list_calendars(client).any? { |list| list.summary.downcase == "weada" }
+    # OLD CODE #
+      # user_weada_events = @placed_activities.map do |placed_activity|
+      # UserEvent.create!(
+      #   start_time: placed_activity[:start],
+      #   end_time: placed_activity[:end],
+      #   activity_id: placed_activity.activity.id,
+      #   user_id: current_user.id,
+      #   duration: calculate_time({ start: placed_activity[:start], end: placed_activity[:end]})
+      #    )
+      # end
+      # create_weada_calendar(client) unless list_calendars(client).any? { |list| list.summary.downcase == "weada" }
+    # <--------------------------------> #
+
+
     @selected_activities.each { |e| insert_weada_event(e, client) }
     # redirect_to calendars_url
   end
