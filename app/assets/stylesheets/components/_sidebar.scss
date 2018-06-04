@@ -1,19 +1,20 @@
-.sidebar{
-  flex: 0 0;
-  width: 39%;
-  background: white;
+#sidebar {
   height: calc(100vh - 70px);
-  position: absolute;
-  right: 0;
+  justify-content: space around;
+  flex: 0 0 450px;
+  position: sticky !important;
+  top: 0 !important;
   background: linear-gradient(179.42deg, rgba(80, 227, 142, 0) 45.01%,
     rgba(81, 187, 125, 0.295) 72.81%), rgba(56, 165, 152, 0.75);
+
 }
 
-.form-design{
+.form-design {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: flex-start;
   align-items: center;
 }
 
