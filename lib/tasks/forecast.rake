@@ -13,7 +13,7 @@ namespace :forecast do
     weather_json = open(weather_url).read
     weather = JSON.parse(weather_json)
     next_120_hours = weather["hourly"]["data"].slice(0..120)
-
+    time_zone = ActiveSupport::TimeZone.new("Eastern Time (US & Canada)")
     # temperature in degrees F
     # windspeed in miles per hour
     next_120_hours.each do |weather_condition|
@@ -25,7 +25,7 @@ namespace :forecast do
       wind_speed: weather_condition["windSpeed"],
       precip_probability: weather_condition["precipProbability"],
       precip_type: weather_condition["precipType"],
-      time: Time.at(weather_condition["time"])
+      time: Time.at(weather_condition["time"].in_time_zone(time_zone))
       )
     end
   end

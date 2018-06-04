@@ -44,10 +44,10 @@ class CalendarsController < ApplicationController
         # placed_activity_hash = recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity)
         # placed_activity_hash[:activity] = user_event.activity
         # @placed_activities << placed_activity_hash
-        time_slot = recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity)
+        time_slot = recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, user_event.activity)
         user_event.update(duration: calculate_time(time_slot))
         user_event.update(start_time: time_slot[:start], end_time: time_slot[:end], status: 1)
-        @new_busys << recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity)
+        @new_busys << recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, user_event.activity)
 
       else
         @a = all_possibilities_in_all_availibilities_interval(filtered, user_event.duration, user_event.activity)
