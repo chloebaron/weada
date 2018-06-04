@@ -1,28 +1,46 @@
 class CalendarsController < ApplicationController
   before_action :get_client_session, only: [:list_calendars, :create_weada_calendar, :insert_weada_event]
 
-  def redirect
-    client = Signet::OAuth2::Client.new(client_options)
-    redirect_to client.authorization_uri.to_s
-  end
+  # def redirect
+  #   client = Signet::OAuth2::Client.new(client_options)
+  #   redirect_to client.authorization_uri.to_s
+  # end
 
   def callback
-    client = Signet::OAuth2::Client.new(client_options)
-    client.code = params[:code]
+    require 'google/apis/calendar_v3'
+    require 'google/api_client/client_secrets.rb'
+    
+    current_user.generate_activites
 
-    response = client.fetch_access_token!
+    secrets = Google::APIClient::ClientSecrets.new({
+      "web" => {
+        "refresh_token" => current_user.refresh_token,
+        "client_id" => ENV["GOOGLE_CLIENT_ID"],
+        "client_secret" => ENV["GOOGLE_CLIENT_SECRET"]
+      }
+    })
 
-    session[:authorization] = response
+    @service = Google::Apis::CalendarV3::CalendarService.new
+    @service.authorization = secrets.to_authorization
+    @service.authorization.refresh!
 
-    service = Google::Apis::CalendarV3::CalendarService.new
-    service.authorization = client
 
-    @ids = get_calendar_id(service)
+    # client = Signet::OAuth2::Client.new(client_options)
+    # client.code = params[:code]
+
+    # response = client.fetch_access_token!
+
+    # session[:authorization] = response
+
+    # service = Google::Apis::CalendarV3::CalendarService.new
+    # service.authorization = client
+
+    @ids = get_calendar_id()
     weada_calendar = @ids.find { |id| id.summary == "Weada" }
-    weada_calendar ||= create_weada_calendar(client)
+    weada_calendar ||= create_weada_calendar()
 
-    free_busy = get_free_busy(service)
-    free_busy_weada = get_free_busy(service, weada_calendar.id)
+    free_busy = get_free_busy()
+    free_busy_weada = get_free_busy(weada_calendar.id)
 
     @busys_weada = free_busy_weada.calendars[weada_calendar.id].busy.map { |busy| { start: busy.start, end: busy.end } }
     @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
@@ -31,8 +49,10 @@ class CalendarsController < ApplicationController
     convert_time_zone(@busys_weada)
 
     @new_busys = (@busys + @busys_weada).sort_by! { |busy| busy[:start] }
-    @selected_activities = UserEvent.joins(:activity).where(status: 0).order("activities.preference desc")
+    # @selected_activities = UserEvent.joins(:activity).where(status: 0).order("activities.preference desc")
 
+    @selected_activities = [UserEvent.create(user: current_user, activity: Activity.first, duration: 30, status: 0)]
+    
     @placed_activities = []
     @selected_activities.each do |user_event|
       @new_busys.sort_by!{ |busy| busy[:start] }
@@ -72,15 +92,14 @@ class CalendarsController < ApplicationController
       end
     end
 
-    @selected_activities.each { |e| insert_weada_event(e, client) }
-    # redirect_to calendars_url
+    @selected_activities.each { |e| insert_weada_event(e) }
   end
 
     # if selected activities not equal to palced_activities,
     # we will ask user if he wanna adjust to see if there might be
 
-  def create_weada_calendar(client)
-    get_service_methods(client)
+  def create_weada_calendar()
+    # get_service_methods(client)
 
     weada_calendar = Google::Apis::CalendarV3::Calendar.new(
     summary: 'Weada',
@@ -90,9 +109,9 @@ class CalendarsController < ApplicationController
   end
 
 
-  def insert_weada_event(user_weada_event, client)
-    get_service_methods(client)
-    weada_calendar = list_calendars(client).find{ |e| e.summary == "Weada" }
+  def insert_weada_event(user_weada_event)
+    # get_service_methods(client)
+    weada_calendar = list_calendars().find{ |e| e.summary == "Weada" }
 
     event = Google::Apis::CalendarV3::Event.new({
       start: Google::Apis::CalendarV3::EventDateTime.new(date_time: user_weada_event.start_time.to_datetime),
@@ -138,8 +157,14 @@ class CalendarsController < ApplicationController
   def free_day_availibilities(busys, wake_up_hour, sleep_hour)
     current_day = DateTime.now
     free_day_availibilities_array = []
-    free_days_num = (current_day + 4.day).mjd - busys.last[:start].mjd
-    last_busy_day = busys.last[:start]
+    if busys.any?
+      free_days_num = (current_day + 4.day).mjd - busys.last[:start].mjd
+      last_busy_day = busys.last[:start]
+    else
+      free_days_num = 5
+      last_busy_day = DateTime.now + 4.days
+    end   
+
     i = 1
     for i in 1..free_days_num
       wake_up = DateTime.new(last_busy_day.year, last_busy_day.month, last_busy_day.day, wake_up_hour, 0, 0, '-4:00') + i.day
@@ -174,7 +199,7 @@ class CalendarsController < ApplicationController
     current_day = DateTime.now
     new_busys = []
     # for current_day in current_day..(busys.last[:start].day)
-    until current_day > busys.last[:end]
+    until busys.last.nil? || current_day > busys.last[:end]
       new_busys << busys.select { |busy| busy[:start].day == current_day.day }
       current_day += 1
     end
@@ -355,8 +380,8 @@ class CalendarsController < ApplicationController
     weada_calendars.each { |weada_calendar| @service.delete_calendar_list(weada_calendar.id) }
   end
 
-  def list_calendars(client)
-    get_service_methods(client)
+  def list_calendars
+    # get_service_methods(client)
 
     @calendar_list = @service.list_calendar_lists.items
   end
@@ -372,10 +397,10 @@ class CalendarsController < ApplicationController
     @service.authorization = client
   end
 
-  def get_calendar_id(service)
+  def get_calendar_id()
     page_token = nil
     begin
-      result = service.list_calendar_lists(page_token: page_token)
+      result = @service.list_calendar_lists(page_token: page_token)
       result.items.each do |e|
         print e.summary + "\n"
       end
@@ -388,7 +413,7 @@ class CalendarsController < ApplicationController
     result.items
   end
 
-  def get_free_busy(calendar_service, id = "primary")
+  def get_free_busy(id = "primary")
     free_busy_request = Google::Apis::CalendarV3::FreeBusyRequest.new
     free_busy_request.time_min = DateTime.now
     free_busy_request.time_max = DateTime.now + 5.days
@@ -396,7 +421,7 @@ class CalendarsController < ApplicationController
     free_busy_request_item = Google::Apis::CalendarV3::FreeBusyRequestItem.new
     free_busy_request_item.id = id
     free_busy_request.items = [ free_busy_request_item ]
-    calendar_service.query_freebusy(free_busy_request)
+    @service.query_freebusy(free_busy_request)
   end
 
   def client_options
