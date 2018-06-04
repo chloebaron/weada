@@ -6,15 +6,12 @@ namespace :forecast do
   task next_120_hours_for_montreal: :environment do
     HourlyWeather.destroy_all
 
-    geo_url = "https://maps.googleapis.com/maps/api/geocode/json?address=Montreal,QC&key=#{ENV["GOOGLE_API_LEO"]}"
-    geo_json = open(geo_url).read
-    geocode = JSON.parse(geo_json)
-    geo_location = geocode["results"][0]["geometry"]["location"]
-
-    weather_url = "https://api.darksky.net/forecast/#{ENV["DARKSKY_API_LEO"]}/#{geo_location['lat']},#{geo_location['lng']}?extends=hourly&exclude=daily,minutely"
+    # geo_url = "https://maps.googleapis.com/maps/api/geocode/json?address=Montreal,QC&key=#{ENV["GOOGLE_API_LEO"]}"
+    # geo_json = open(geo_url).read
+    # geocode = JSON.parse(geo_json)
+    weather_url = "https://api.darksky.net/forecast/#{ENV["DARKSKY_API_LEO"]}/45.516136,-73.656830?extend=hourly&exclude=daily,minutely"
     weather_json = open(weather_url).read
     weather = JSON.parse(weather_json)
-
     next_120_hours = weather["hourly"]["data"].slice(0..120)
 
     # temperature in degrees F

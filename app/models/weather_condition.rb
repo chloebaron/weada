@@ -12,6 +12,6 @@ class WeatherCondition < ApplicationRecord
   end
 
   def warm?
-    apparent_temperature >= 15.0
+    apparent_temperature >= 59.0
   end
 end
