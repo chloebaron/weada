@@ -6,7 +6,7 @@ class CalendarsController < ApplicationController
     redirect_to client.authorization_uri.to_s
   end
 
-  def callback
+  def callback # NEEDS REFACTORING
     client = Signet::OAuth2::Client.new(client_options)
     client.code = params[:code]
 
@@ -17,26 +17,41 @@ class CalendarsController < ApplicationController
     service = Google::Apis::CalendarV3::CalendarService.new
     service.authorization = client
 
-    free_busy = get_free_busy(service)
+    free_busy = get_free_busy(service) # array calendars and their upcoming events
 
+    # one issue is that only the events on the user's primary calendar are taken into consideration
+    # we don't have a way of looking at their other pre planned events for different calendars
+    # so it's possible that there will be conflicting weada events
+
+    ###--USED FOR VIEW DISPLAY ONLY--###
     @events = service.list_events("primary").items
-    @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
+    ##
+
+    @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } } # reformat events into start end groups
     convert_time_zone(@busys)
-    params = { user_events: {"2"=>"60", "3"=>"30", "4"=>"30", "5"=>"30", "6"=>"30", "7"=>"120", "8"=>"30", "9"=>"30", "10"=>"30", "11"=>"30"},
+
+    # This variable is used only for testing purposes, still need to figure out a way to dynamically get this from the user
+    chosen_user_events = { user_event_durations: {"2"=>"60", "3"=>"30", "4"=>"30", "5"=>"30", "6"=>"30", "7"=>"120", "8"=>"30", "9"=>"30", "10"=>"30", "11"=>"30"},
     activity_ids: ["6", "2", "7"]}
     @selected_activities = []
-    params[:activity_ids].each do |id|
-      @selected_activities << { activity: Activity.find(id), duration: params[:user_events]["#{id}"].to_i }
+
+    chosen_user_events[:activity_ids].each do |id|
+      @selected_activities << { activity: Activity.find(id), duration: chosen_user_events[:user_event_durations]["#{id}"].to_i }
     end
+
     @new_busys = @busys
-    @selected_activities.sort_by! { |activity| activity[:activity].preference }
+    @selected_activities.sort_by! { |activity| activity[:activity].preference } # will start placing activities based on preference
     @placed_activities = []
+
     @selected_activities.each do |activity|
       @new_busys_seperated = seperate_busys_by_date(@new_busys)
+
       @availibilities = availibilities(@new_busys_seperated)
       @availibilities += free_day_availibilities(@new_busys, 8, 22)
+
       filtered = filtered_by_duration(@availibilities, activity[:duration])
-      if filtered.empty?
+
+      if filtered.empty? # if there is no activity that is shorter than available free time then...
         placed_activity_hash = recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity)
         placed_activity_hash[:activity] = activity[:activity]
         @placed_activities << placed_activity_hash
@@ -72,7 +87,7 @@ class CalendarsController < ApplicationController
     # redirect_to calendars_url
   end
 
-    # if selected activities not equal to palced_activities,
+    # if selected activities not equal to placed_activities,
     # we will ask user if he wanna adjust to see if there might be
 
   def create_weada_calendar(client)
@@ -114,27 +129,30 @@ class CalendarsController < ApplicationController
     end
    end
 
-  def availibilities(busys)
+  # It may be better not to flatten the array of arrays at the end of this function
+  def availibilities(busys) # => array of the times you are available in order of day
     availibilities = []
     busys.each do |busy|
       date = busy[0][:start]
       i = 0
       availibilities_for_day = []
-      availibilities_for_day << after_wake_up(busy, date) unless after_wake_up(busy, date).nil?
+      availibilities_for_day << free_time_after_wake_up(busy, date) unless free_time_after_wake_up(busy, date).nil?
       while i < busy.length - 1
         availibilities_for_day << { start: busy[i][:end], end: busy[i + 1][:start] }
         i += 1
       end
-      availibilities_for_day << before_sleep(busy, date) unless before_sleep(busy, date).nil?
+      availibilities_for_day << free_time_before_sleep(busy, date) unless free_time_before_sleep(busy, date).nil?
       availibilities << availibilities_for_day
     end
     availibilities.flatten
   end
 
+
+  # what does this function do excatly??
   def free_day_availibilities(busys, wake_up_hour, sleep_hour)
     current_day = DateTime.now
     free_day_availibilities_array = []
-    free_days_num = (current_day + 4.day).mjd - busys.last[:start].mjd
+    free_days_num = (current_day + 4.day).mjd - busys.last[:start].mjd # subtracts days in the week from eachother in julian date format to get number of days
     last_busy_day = busys.last[:start]
     i = 1
     for i in 1..free_days_num
@@ -146,30 +164,35 @@ class CalendarsController < ApplicationController
     free_day_availibilities_array
   end
 
-  def after_wake_up(busy, date)
+
+  # Still need to find a way to integrate user input for wake up and sleep time
+  def free_time_after_wake_up(busy, date)
     wake_up = DateTime.new(date.year, date.month, date.day, 8, 0, 0, '-04:00')
     current_date_time = DateTime.now
-    if current_date_time >= wake_up && current_date_time < busy[0][:start]
+    if current_date_time >= wake_up && current_date_time < busy[0][:start] # see if the current start time is a viable start time
       { start: current_date_time, end: busy[0][:start] }
-    elsif current_date_time < wake_up
+    elsif current_date_time < wake_up # if not then the start time will be whenever they wake up
       { start: wake_up, end: busy[0][:start] }
     end
   end
 
-  def before_sleep(busy, date)
+  # Still need to find a way to integrate user input for wake up and sleep time
+  def free_time_before_sleep(busy, date)
     _sleep = DateTime.new(date.year, date.month, date.day, 22, 0, 0, '-04:00')
     current_date_time = DateTime.now
     if current_date_time < _sleep  && current_date_time > busy.last[:end]
-      { start: cuurent_date_time, end: _sleep }
-    elsif current_date_time <= busy.last[:end]
+      { start: cuurent_date_time, end: _sleep } # see if the current time is a suitable start time
+    elsif current_date_time <= busy.last[:end] # if not then the time their last event ends will be their start time
       { start: busy.last[:end], end: _sleep }
     end
   end
 
+
+  # This is really clever ye :D, Nice job!
   def seperate_busys_by_date(busys)
     current_day = DateTime.now
     new_busys = []
-    # for current_day in current_day..(busys.last[:start].day)
+
     until current_day > busys.last[:end]
       new_busys << busys.select { |busy| busy[:start].day == current_day.day }
       current_day += 1
@@ -181,7 +204,7 @@ class CalendarsController < ApplicationController
     ((availibility[:end] - availibility[:start]) * 24 * 60).to_f # => minutes
   end
 
-  def filtered_by_duration(availibilities, duration_input)
+  def filtered_by_duration(availibilities, duration_input) # find the free times that are longer than the user given duration for an activity
     availibilities.flatten.select do |availibility|
       calculate_time(availibility) >= duration_input
     end
@@ -196,13 +219,13 @@ class CalendarsController < ApplicationController
     end
   end
 
-  def each_interval_weather(interval_time_slot)
-    HourlyWeather.all.select do |w|
-      w.time.to_datetime == interval_time_slot[:start] -= interval_time_slot[:start].minute.minute
+  def get_weather_at_interval(interval_time_slot) # => all hourly weathers whose hour matches the hour of the interval
+    HourlyWeather.all.select do |hourly_weather|
+      hourly_weather.time.to_datetime == interval_time_slot[:start] -= interval_time_slot[:start].minute.minute
     end
   end
 
-  def all_event_weathers_good?(event_weathers_a, activity)
+  def all_event_weathers_good?(event_weathers_a, activity) # => returns all events that are true for 'permitted_under_weather()'
     event_weathers_a.all? { |e| activity.permitted_under_weather(e) }
   end
 
@@ -214,9 +237,9 @@ class CalendarsController < ApplicationController
   # previous attempt start time is 8: 40, next attempt start time would be 9:00
   # instead of moving forward in a fixed amount
   # the point is to check through all weather conditions during an event
-  def move_forward(event, duration_input)
-    a = 60 - event[:start].minute
-    event[:start] += a.minute
+  def move_forward_to_next_interval(event, duration_input)
+    minutes_from_one_hour = 60 - event[:start].minute
+    event[:start] += minutes_from_one_hour.minute # move forward into next hour
     event[:start] -= event[:start].second
     event[:end] = event[:start] + duration_input.minute
     event
@@ -229,8 +252,8 @@ class CalendarsController < ApplicationController
     event
   end
 
-  def event_hash(f, duration_input)
-    { start: f[:start], end: f[:start] + duration_input.minute }
+  def event_hash(event, duration_input)
+    { start: event[:start], end: event[:start] + duration_input.minute }
   end
 
   # find all posibilities in one slot
@@ -242,12 +265,13 @@ class CalendarsController < ApplicationController
       if all_event_weathers_good?(event_weathers(event), activity)
         events << {start: event[:start], end: event[:end] }
       end
-        event = move_forward(event, duration_input)
+      event = move_forward_to_next_interval(event, duration_input)
     end
     events # => [...]
   end
+
   # find all posibilities to insert events by movinfg forward in duration
-  def all_possibilities_in_each_availibility_duration(f, duration_input, activity)
+  def all_possibilities_in_each_availibility_duration(f, duration_input, activity) # maybe we shoudl get rid of the end time option in the user activity?
     event = event_hash(f, duration_input) # => { start: , end:  }
     events = []
     while event[:end] < f[:end]
@@ -259,7 +283,7 @@ class CalendarsController < ApplicationController
     events # => [...]
   end
 
-  # find all free time slot that is suitable for acvity
+  # find all free time slot that is suitable for activity
   def all_possibilities_in_all_availibilities_interval(filtered, duration_input, activity)
     all = []
     filtered.each do |f|
@@ -279,59 +303,60 @@ class CalendarsController < ApplicationController
   end
 
   def mix(interval, duration)
-    (interval + duration).uniq.sort_by! { |e| e[:start] } # e => hash
+    (interval + duration).uniq.sort_by! { |event| event[:start] } # e => hash
   end
 
-
-  def get_all_interval_time_slot_in_one_availibility(availibility)
+  # Doesn't take weather into account
+  def get_all_interval_time_slot_in_one_availibility(availibility) # sets intervals of time within one availability
     all_in_one_availibility = []
     interval_time_slot = { start: availibility[:start], end: availibility[:start] + (60 - availibility[:start].minute).minute }
     all_in_one_availibility << interval_time_slot
     while interval_time_slot[:end] < availibility[:end]
-      if availibility[:end] - interval_time_slot[:end] > 1.hour
+      if availibility[:end] - interval_time_slot[:end] > 1.hour # what if the difference is equal to an hour?
         interval_time_slot[:start] = interval_time_slot[:end]
-        interval_time_slot[:end] += 1.hour
-      elsif availibility[:end] -  interval_time_slot[:end] < 1.hour && availibility[:end] -  interval_time_slot[:end] > 0
+        interval_time_slot[:end] += 1.hour # make the interval an hour long if it is greater than 1 hour
+      elsif availibility[:end] - interval_time_slot[:end] < 1.hour && availibility[:end] - interval_time_slot[:end] > 0
+        # if time is less than 1hour, but can still fit within the availablity then...
         interval_time_slot[:start] = interval_time_slot[:end]
-        interval_time_slot[:end] = availibility[:end]
+        interval_time_slot[:end] = availibility[:end] # make the interval last until the availability ends
       end
       all_in_one_availibility << interval_time_slot
     end
-    all_in_one_availibility
+    all_in_one_availibility # array of intervals within one availability
   end
 
   def merge_all_squent_suitable_time_slots_in_each_availibility(suitable_interval_time_slots)
     merged_all_squent_suitable_time_slots = []
-      suitable_interval_time_slots.each_with_index do |e, index|
+      suitable_interval_time_slots.each_with_index do |suitable_interval, index|
         if !suitable_interval_time_slots[index + 1].nil?
-          if e[:end] == suitable_interval_time_slots[index + 1][:start]
-            e[:end] = suitable_interval_time_slots[index + 1][:end]
-            merged_all_squent_suitable_time_slots << e
+          if suitable_interval[:end] == suitable_interval_time_slots[index + 1][:start] # if two intervals are next to each other then...
+            suitable_interval[:end] = suitable_interval_time_slots[index + 1][:end] # extend the previous interval into the length of the adjacent one
+            merged_all_squent_suitable_time_slots << suitable_interval
           else
-            merged_all_squent_suitable_time_slots << e
+            merged_all_squent_suitable_time_slots << suitable_interval
           end
         else
-          merged_all_squent_suitable_time_slots << e
+          merged_all_squent_suitable_time_slots << suitable_interval
         end
       end
-      merged_all_squent_suitable_time_slots
-
+    merged_all_squent_suitable_time_slots # => an array of adajacently merged time slots
   end
 
+  # Takes weather into account
   def recommend_longest_suitable_time_slot_from_all_availibilities(availibilities, activity)
     all_candidates_from_each_merged = []
     availibilities.each do |availibility|
       all_in_one_availibility = get_all_interval_time_slot_in_one_availibility(availibility)
-      suitable_interval_time_slots = all_in_one_availibility.select do |e|
-        all_event_weathers_good?(each_interval_weather(e), activity)
+      suitable_interval_time_slots = all_in_one_availibility.select do |interval| # => an array of suitable time slots for activities given the weather condition for that interval
+        all_event_weathers_good?(get_weather_at_interval(interval), activity)
       end
-      a = merge_all_squent_suitable_time_slots_in_each_availibility(suitable_interval_time_slots)
-      all_candidates_from_each_merged << find_longest_suitale_time_slot_from_one_merged(a) unless find_longest_suitale_time_slot_from_one_merged(a).nil?
+      merged_slots = merge_all_squent_suitable_time_slots_in_each_availibility(suitable_interval_time_slots)
+      all_candidates_from_each_merged << find_longest_suitale_time_slot_from_one_merged(merged_slots) unless find_longest_suitale_time_slot_from_one_merged(merged_slots).nil?
     end
-    all_candidates_from_each_merged.sort_by! { |e| e[:end] - e[:start] }.last
+    all_candidates_from_each_merged.sort_by! { |e| e[:end] - e[:start] }.last # => return the longest merged time slot
   end
 
-  def find_longest_suitale_time_slot_from_one_merged(merged_all_squent_suitable_time_slots)
+  def find_longest_suitale_time_slot_from_one_merged(merged_all_squent_suitable_time_slots) # => the longest free time slot
     merged_all_squent_suitable_time_slots.sort_by! { |e| e[:end] - e[:start] }.last
   end
 
@@ -355,14 +380,15 @@ class CalendarsController < ApplicationController
 
 
   def delete_weada_calendar
-    list_calendars
+    list_calendars # this function provides the @calendar_list array
+
     weada_calendars = @calendar_list.find_all {|calendar| calendar.summary == "Weada"}
     raise
     weada_calendars.each { |weada_calendar| @service.delete_calendar_list(weada_calendar.id) }
   end
 
   def list_calendars(client)
-    get_service_methods(client)
+    get_service_methods(client) # returns the @service variable, which is a wrapper that allows us to user various methods
 
     @calendar_list = @service.list_calendar_lists.items
   end
@@ -391,6 +417,7 @@ class CalendarsController < ApplicationController
     free_busy = calendar_service.query_freebusy(free_busy_request)
 
     free_busy
+    raise
   end
 
   def client_options

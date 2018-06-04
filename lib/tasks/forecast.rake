@@ -11,7 +11,7 @@ namespace :forecast do
     geocode = JSON.parse(geo_json)
     geo_location = geocode["results"][0]["geometry"]["location"]
 
-    weather_url = "https://api.darksky.net/forecast/#{ENV["DARKSKY_API_LEO"]}/#{geo_location['lat']},#{geo_location['lng']}?extends=hourly&exclude=daily,minutely"
+    weather_url = "https://api.darksky.net/forecast/#{ENV["DARKSKY_API_LEO"]}/#{geo_location['lat']},#{geo_location['lng']}?extends=hourly&exclude=flags,minutely"
     weather_json = open(weather_url).read
     weather = JSON.parse(weather_json)
 
