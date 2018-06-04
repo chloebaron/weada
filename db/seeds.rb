@@ -2,6 +2,7 @@
 # User.create(email: "user@user.com", password: "testing")
 Activity.destroy_all
 User.destroy_all
+UserEvent.destroy_all
 
 
 User.create!(
@@ -12,6 +13,13 @@ User.create!(
   address: " 5333 Avenue Casgrain #102, Montréal, QC H2T 1X6" #.strip.gsub(/\s+/, " ").gsub(/(\(|\)|\#)/, "").unicode_normalize(:nfkd).encode('ASCII', replace: '')
   )
 
+  User.create!(
+  email: "test2@test.com",
+  password: "testing",
+  first_name: "john",
+  last_name: "johnson",
+  address: " yo mama" #.strip.gsub(/\s+/, " ").gsub(/(\(|\)|\#)/, "").unicode_normalize(:nfkd).encode('ASCII', replace: '')
+  )
 
 {
   "run" => {
