@@ -25,7 +25,7 @@ namespace :forecast do
       wind_speed: weather_condition["windSpeed"],
       precip_probability: weather_condition["precipProbability"],
       precip_type: weather_condition["precipType"],
-      time: Time.at(weather_condition["time"].in_time_zone(time_zone))
+      time: Time.at(weather_condition["time"]).in_time_zone(time_zone)
       )
     end
   end

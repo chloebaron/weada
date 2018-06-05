@@ -103,6 +103,23 @@ class CalendarsController < ApplicationController
     free_day_availibilities_array
   end
 
+  def free_days_between(busys_seperated, wake_up_hour, sleep_hour)
+    i = 0
+    until busys_seperated[i+1].nil?
+      free_days_between = busys_seperated[i+1].first[:start] - busys_seperated[i].last[:end]
+      if free_days_between >= 1.day
+        n = 1
+        for n in 1.. free_days_between.floor
+          wake_up = DateTime.new(busys_seperated[i].last[:end].year, busys_seperated[i].last[:end].month, busys_seperated[i].last[:end].day, wake_up_hour, 0, 0, '-4:00') + n.day
+          _sleep = DateTime.new(busys_seperated[i].last[:end].year, busys_seperated[i].last[:end].month, busys_seperated[i].last[:end].day, sleep_hour, 0, 0, '-4:00') + n.day
+          free_days_between << { start: wake_up, end: _sleep}
+          n += 1
+        end
+      end
+      i += 1
+    end
+  end
+
 
   # Still need to find a way to integrate user input for wake up and sleep time
   def free_time_after_wake_up(busy, date)
@@ -392,15 +409,6 @@ class CalendarsController < ApplicationController
     convert_time_zone(@busys_weada)
 
 
-    # OLD CODE #
-      # params = { user_events: {"2"=>"100", "3"=>"30", "4"=>"30", "5"=>"30", "6"=>"100", "7"=>"120", "8"=>"30", "9"=>"30", "10"=>"30", "11"=>"30"},
-      # activity_ids: ["6", "2", "7"]}
-      # @selected_activities = []
-      # params[:activity_ids].each do |id|
-      #   @selected_activities << { activity: Activity.find(id), duration: params[:user_events]["#{id}"].to_i }
-      # end
-    # <--------------------------------> #
-
     # combine all the busy events
     @new_busys = (@busys + @busys_weada).sort_by! { |busy| busy[:start] }
 
@@ -426,12 +434,6 @@ class CalendarsController < ApplicationController
 
       if filtered.empty? # if there is no activity that is shorter than available free time then...
 
-        # OLD CODE #
-          # placed_activity_hash = recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity)
-          # placed_activity_hash[:activity] = user_event.activity
-          # @placed_activities << placed_activity_hash
-        # <--------------------------------> #
-
         time_slot = recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, user_event.activity)
 
         # user_event.update(duration: calculate_time(time_slot))
@@ -447,13 +449,6 @@ class CalendarsController < ApplicationController
         @all_possibilities_insert_event = combine_possibilities(@interval_slot_possiblilities, @duration_slot_possiblilities)
 
         if @all_possibilities_insert_event.empty?
-
-          # OLD CODE #
-            # placed_activity_hash = recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity) unless recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, activity).nil?
-            # placed_activity_hash[:activity] = user_event.activity
-            # @placed_activities << placed_activity_hash
-          # <--------------------------------> #
-
           time_slot = unless recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, user_event.activity).nil?
             recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, user_event.activity)
           end
@@ -461,13 +456,6 @@ class CalendarsController < ApplicationController
           user_event.update(duration: calculate_time(time_slot))
           user_event.update(start_time: time_slot[:start], end_time: time_slot[:end], status: 1)
         else
-
-          # OLD CODE #
-            # placed_activity_hash = @all_possibilities_insert_event.first
-            # placed_activity_hash[:activity] = user_event.activity
-            # @placed_activities << placed_activity_hash
-          # <--------------------------------> #
-
           time_slot = @all_possibilities_insert_event.first
           user_event.update(duration: calculate_time(time_slot))
           user_event.update(start_time: time_slot[:start], end_time: time_slot[:end], status: 1)
