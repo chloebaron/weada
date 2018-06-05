@@ -59,6 +59,7 @@ class UserEventsController < CalendarsController
 
     # raise
     redirect_to display_weada_calendar_path
+
   end
 
 
