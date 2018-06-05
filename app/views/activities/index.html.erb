@@ -27,6 +27,7 @@
         <% @activities.each do |activity| %>
             <div class="card hidden activity-wrapper-<%= activity.id %>"
               <input type="checkbox" name="activity_ids[]" id="<%= activity.id %>" value="<%= activity.id %>" class="hidden">
+
               <div class="card-name <%= activity.name %>-color">
                 <%= activity.name.capitalize %>
               </div>
@@ -34,7 +35,7 @@
                 <i class="fa fa-<%= @icons[activity.name.to_sym] %> <%= activity.name %>-color  fa-lg"></i>
               </div>
               <div class="duration-select">
-              <%= select(:user_events, activity.id, [['30', 30], ['60', 60], ['90', 90], ['120', 120]]) %>
+              < <%= select(:user_events, activity.id, [['30', 30], ['60', 60], ['90', 90], ['120', 120]], include_blank: true) %>
               </div>
             </div>
         <% end %>
