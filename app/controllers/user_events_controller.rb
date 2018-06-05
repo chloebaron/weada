@@ -21,7 +21,7 @@ class UserEventsController < CalendarsController
 
   # METHODS USED ARE PRIVATE #
   def generate_calendar
-    get_hourly_forecasts # => fills database with forecasts
+    get_hourly_forecasts if HourlyWeather.all.empty? # => fills database with forecasts if data base is empty
 
     get_client_session # => @client
     get_service_methods(@client) # => @service
@@ -42,7 +42,7 @@ class UserEventsController < CalendarsController
 
     convert_time_zone(@busys_weada)
 
-    combine_weada_and_primary_buys(@busys, @weada_busys) # => @new_busys
+    combine_weada_and_primary_buys(@busys, @busys_weada) # => @new_busys
 
     get_availibilities(@new_busys) # => @availabilities
 
@@ -57,8 +57,8 @@ class UserEventsController < CalendarsController
     # Insert event into Weada calendar
     @selected_activities.each { |user_event| insert_weada_event(user_event, @client) }
 
-    raise
-    redirect_to dashboard_path
+    # raise
+    redirect_to display_weada_calendar_path
   end
 
 
@@ -125,10 +125,11 @@ class UserEventsController < CalendarsController
     ids = get_calendar_id(service)
     @weada_calendar = ids.find { |id| id.summary == "Weada" }
     @weada_calendar ||= create_weada_calendar(client)
+    # raise
   end
 
   def combine_weada_and_primary_buys(primary_busys, weada_busys)
-    @new_busys = (@busys + @busys_weada).sort_by! { |busy| busy[:start] }
+    @new_busys = (primary_busys + weada_busys).sort_by! { |busy| busy[:start] }
     @new_busys
   end
 

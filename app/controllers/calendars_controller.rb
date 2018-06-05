@@ -4,7 +4,14 @@ class CalendarsController < ApplicationController
     redirect_to client.authorization_uri.to_s
   end
 
-  def callback # NEEDS REFACTORING
+  def display_weada_calendar
+    get_client_session # => @client
+    find_weada_calendar(@client) # => @weada_calendar
+
+    @id = @weada_calendar.id
+  end
+
+  def callback
     client = Signet::OAuth2::Client.new(client_options)
     client.code = params[:code]
 
@@ -23,7 +30,7 @@ class CalendarsController < ApplicationController
     # we will ask user if he wanna adjust to see if there might be
 
   def create_weada_calendar(client)
-    get_service_methods(client)
+    get_service_methods(client) # => @service
 
     weada_calendar = Google::Apis::CalendarV3::Calendar.new(
     summary: 'Weada',
@@ -35,7 +42,7 @@ class CalendarsController < ApplicationController
 
 
   def insert_weada_event(user_weada_event, client)
-    get_service_methods(client)
+    get_service_methods(client) # => @service
     weada_calendar = list_calendars(client).find{ |e| e.summary == "Weada" }
 
     event = Google::Apis::CalendarV3::Event.new(
@@ -67,7 +74,6 @@ class CalendarsController < ApplicationController
     end
    end
 
-    # It may be better not to flatten the array of arrays at the end of this function
   def availibilities(busys) # => array of the times you are available in order of day
     busys.reject! { |busy| busy.empty? }
     availibilities = []
@@ -87,7 +93,7 @@ class CalendarsController < ApplicationController
   end
 
 
-  # what does this function do excatly??
+  # gets the
   def free_day_availibilities(busys, wake_up_hour, sleep_hour)
     current_day = DateTime.now
     free_day_availibilities_array = []
@@ -317,6 +323,12 @@ class CalendarsController < ApplicationController
     get_service_methods(client) # returns the @service variable, which is a wrapper that allows us to use various methods
 
     @calendar_list = @service.list_calendar_lists.items
+  end
+
+  def find_weada_calendar(client)
+    list_calendars(client)
+    @weada_calendar = @calendar_list.find {|calendar| calendar.summary == "Weada"}
+    @weada_calendar
   end
 
   def get_client_session
