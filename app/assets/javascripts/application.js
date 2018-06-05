@@ -10,5 +10,5 @@ function handleEvent(_, t) {
 
   activityHiddenToggle = document.querySelector(".activity-wrapper-" + t.classList.value ).classList.toggle("hidden")
   activityCardColor = document.querySelector(".option-" + t.classList.value).classList.toggle("chosen")
-
 }
+

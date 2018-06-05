@@ -1,30 +1,32 @@
-# frozen_string_literal: true
-
 class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
-  # You should configure your model like this:
-  # devise :omniauthable, omniauth_providers: [:twitter]
+  def google_oauth2 
+    auth = request.env['omniauth.auth']
+    
+    # drive = Google::Apis::DriveV2::DriveService.new
+    # drive.authorization.access_token = auth.credentials.token
+    # drive.authorization.refresh_token = auth.credentials.refresh_token
+    # drive.authorization.client_id = ENV['GOOGLE_CLIENT_ID']
+    # drive.authorization.client_secret = ENV['GOOGLE_CLIENT_SECRET']
+    # drive.authorization.refresh!
 
-  # You should also create an action method in this controller like this:
-  # def twitter
-  # end
+    # drive = Google::Apis::DriveV2::DriveService.new
 
-  # More info at:
-  # https://github.com/plataformatec/devise#omniauth
+    # drive = Google::Apis::DriveV2::DriveService.new
 
-  # GET|POST /resource/auth/twitter
-  # def passthru
-  #   super
-  # end
+    # @client = Google::APIClient.new
+    # @service = @client.discovered_api('calendar', 'v3')
 
-  # GET|POST /users/auth/twitter/callback
-  # def failure
-  #   super
-  # end
+    # byebug
 
-  # protected
+    # You need to implement the method below in your model (e.g. app/models/user.rb)
+    @user = User.from_omniauth(auth)
 
-  # The path used when OmniAuth fails
-  # def after_omniauth_failure_path_for(scope)
-  #   super(scope)
-  # end
+    if @user.persisted?
+      flash[:notice] = I18n.t 'devise.omniauth_callbacks.success', kind: 'Google'
+      sign_in_and_redirect @user, event: :authentication
+    else
+      session['devise.google_data'] = request.env['omniauth.auth'].except(:extra) # Removing extra as it can overflow some session stores
+      redirect_to new_user_registration_url, alert: @user.errors.full_messages.join("\n")
+    end
+  end
 end
