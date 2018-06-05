@@ -6,7 +6,7 @@
   <div id="routine-form-wrapper" class="container">
     <div id="routine-form">
       <h2>Let’s get started! Tell us a bit about your routine.</h2>
-      <%= form_tag(new_user_registration_path, method: "get") do %>
+      <%= form_tag(new_user_registration_path, method: "post") do %>
           <div class="row form-group">
             <%= label_tag(:wake_up_hour, "Wake up time: ", class: "col-sm-4 col-form-label") %>
             <div class="col-sm-6">
