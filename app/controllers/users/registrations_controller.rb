@@ -6,6 +6,11 @@ class Users::RegistrationsController < Devise::RegistrationsController
   def collect_routine
   end
 
+  protected
+
+  def after_sign_up_path_for(resource)
+    user_google_oauth2_omniauth_authorize_path # Or :prefix_to_your_route
+  end
   # def create
 
   # end

@@ -122,30 +122,39 @@ class CalendarsController < ApplicationController
     DateTime.new(date.year, date.month, date.day, current_user.sleep_hour.to_i, 0, 0, '-04:00')
   end
 
-  def availibilities(busys) # => array of the times you are available in order of day
-    busys.reject! { |busy| busy.empty? }
+  def availibilities(days_of_busies) # => array of the times you are available in order of day
+    days_of_busies.reject! { |busy| busy.empty? }
     availibilities = []
-    busys.each do |busy|
-      date = busy[0][:start]
-      i = 0
+    days_of_busies.each do |busies|
+      date = busies.first[:start]
       availibilities_for_day = []
-      availibilities_for_day << free_time_after_wake_up(busy, date) unless free_time_after_wake_up(busy, date).nil?
-      while i < busy.length
-        if busy[i + 1].nil?
+
+      unless free_time_after_wake_up(busy, date).nil?
+        availibilities_for_day << free_time_after_wake_up(busy, date)
+      end
+
+      busies.each_with_index do |busy, index|
+        if busy[index + 1].nil?
           start_time = busy[i][:end]
           end_time = bedtime(date)
         else
           start_time = busy[i][:end]
-          end_time =  busy[i + 1][:start]
+          end_time =  busy[index + 1][:start]
         end
 
-        if availability_is_within_waking_hours?({start: start_time, end: end_time}, wakeup_time(date), bedtime(date))
+        if availability_is_within_waking_hours?(
+          {start: start_time, end: end_time},
+          wakeup_time(date),
+          bedtime(date)
+        )
           availibilities_for_day << { start: start_time, end: end_time }
         end
-
-        i += 1
       end
-      availibilities_for_day << free_time_before_sleep(busy, date) unless free_time_before_sleep(busy, date).nil?
+
+      unless free_time_before_sleep(busy, date).nil?
+        availibilities_for_day << free_time_before_sleep(busy, date)
+      end
+
       availibilities << availibilities_for_day
     end
     availibilities.flatten
@@ -161,11 +170,8 @@ class CalendarsController < ApplicationController
       last_busy_day = busys.last[:start]
     else
       free_days_num = 5
-
       last_busy_day = DateTime.now
-
     end
-
     i = 1
     for i in 1..free_days_num
       wake_up = DateTime.new(last_busy_day.year, last_busy_day.month, last_busy_day.day, wake_up_hour, 0, 0, '-4:00') + i.day
@@ -191,6 +197,7 @@ class CalendarsController < ApplicationController
       end
       i += 1
     end
+    free_days_between
   end
 
   # Still need to find a way to integrate user input for wake up and sleep time
