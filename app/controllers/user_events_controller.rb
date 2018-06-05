@@ -23,7 +23,7 @@ class UserEventsController < CalendarsController
   def generate_calendar
     require 'google/apis/calendar_v3'
     require 'google/api_client/client_secrets.rb'
-    
+
     secrets = Google::APIClient::ClientSecrets.new({
       "web" => {
         "refresh_token" => current_user.refresh_token,
@@ -35,7 +35,7 @@ class UserEventsController < CalendarsController
     @service = Google::Apis::CalendarV3::CalendarService.new
     @service.authorization = secrets.to_authorization
     @service.authorization.refresh!
-    
+
     get_hourly_forecasts if HourlyWeather.all.empty? # => fills database with forecasts if data base is empty
 
     # get_client_session # => @client
@@ -72,7 +72,7 @@ class UserEventsController < CalendarsController
     # Insert event into Weada calendar
     @selected_activities.each { |user_event| insert_weada_event(user_event, ) }
 
-    redirect_to display_weada_calendar_path    
+    redirect_to display_weada_calendar_path
   end
 
 
@@ -149,15 +149,15 @@ class UserEventsController < CalendarsController
 
   def get_availibilities(new_busys)
     new_busys.sort_by!{ |busy| busy[:start] }
-    
+
     # group activities by date
     new_busys_seperated = seperate_busys_by_date(new_busys)
-    
+
     # get availabilities for the week
     @availibilities = availibilities(new_busys_seperated)
-    
+
     # add the availbilities of the days where there are no activities
-    @availibilities += free_day_availibilities(new_busys, 8, 22)
+    @availibilities += free_day_availibilities(new_busys, current_user.wake_up_hour.to_i, current_user.sleep_hour.to_i)
   end
 
   def find_optimal_availabilities(availibilities, user_event)
