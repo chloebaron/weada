@@ -5,6 +5,20 @@ class CalendarsController < ApplicationController
   end
 
   def display_weada_calendar
+    require 'google/apis/calendar_v3'
+    require 'google/api_client/client_secrets.rb'
+
+    secrets = Google::APIClient::ClientSecrets.new({
+      "web" => {
+        "refresh_token" => current_user.refresh_token,
+        "client_id" => ENV["GOOGLE_CLIENT_ID"],
+        "client_secret" => ENV["GOOGLE_CLIENT_SECRET"]
+      }
+    })
+
+    @service = Google::Apis::CalendarV3::CalendarService.new
+    @service.authorization = secrets.to_authorization
+    @service.authorization.refresh!
     # get_client_session # => @client
     find_weada_calendar() # => @weada_calendar
 
@@ -147,7 +161,9 @@ class CalendarsController < ApplicationController
       last_busy_day = busys.last[:start]
     else
       free_days_num = 5
+
       last_busy_day = DateTime.now
+
     end
 
     i = 1
@@ -385,7 +401,7 @@ class CalendarsController < ApplicationController
   end
 
   def find_weada_calendar()
-    # list_calendars(client)
+    list_calendars()
     @weada_calendar = @calendar_list.find {|calendar| calendar.summary == "Weada"}
     @weada_calendar
   end

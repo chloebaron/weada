@@ -16,7 +16,9 @@ class UserEventsController < CalendarsController
         UserEvent.create!(user: current_user, activity: activity, status: 0, duration: params[:user_events][activity_id].to_i)
       end
     end
-    redirect_to redirect_path
+
+
+    redirect_to generate_calendar_path
   end
 
   # METHODS USED ARE PRIVATE #
@@ -167,9 +169,9 @@ class UserEventsController < CalendarsController
   end
 
   def get_chosen_activities
-    # events = UserEvent.all
-    # @selected_activities = events.find_all { |event| event.user_id == current_user.id && event.status == 0 }
-    @selected_activities = [UserEvent.create(user: current_user, activity: Activity.first, duration: 60)]
+    events = UserEvent.all
+    @selected_activities = events.find_all { |event| event.user_id == current_user.id && event.status == 0 }
+    # @selected_activities = [UserEvent.create(user: current_user, activity: Activity.first, duration: 60)]
   end
 
   def find_best_times_for_chosen_activities(selected_activities, new_busys, availibilities)
