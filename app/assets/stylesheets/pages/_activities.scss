@@ -4,3 +4,14 @@
   justify-content: space-between;
   //flex-wrap: wrap;
 }
+
+.activities-wrapper {
+  display: flex;
+  height: calc(100vh - 70px);
+  justify-content: space-between;
+  overflow-y: scroll;
+}
+
+h2 {
+  font-weight: bold;
+}
