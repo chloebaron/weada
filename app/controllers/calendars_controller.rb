@@ -87,6 +87,27 @@ class CalendarsController < ApplicationController
     end
    end
 
+  def datetime_before_wakeup?(datetime, days_wakeup_time)
+    datetime < days_wakeup_time
+  end
+
+  def datetime_after_bedtime?(datetime, days_bedtime)
+    datetime > days_bedtime
+  end
+
+  def availability_is_within_waking_hours?(availability, wakeup_time, bedtime)
+    !datetime_before_wakeup?(availability[:start], wakeup_time) &&
+    !datetime_after_bedtime?(availability[:end], bedtime)
+  end
+
+  def wakeup_time(date)
+    DateTime.new(date.year, date.month, date.day, 8, 0, 0, '-04:00')
+  end
+
+  def bedtime(date)
+    DateTime.new(date.year, date.month, date.day, 22, 0, 0, '-04:00')
+  end
+
   def availibilities(busys) # => array of the times you are available in order of day
     busys.reject! { |busy| busy.empty? }
     availibilities = []
@@ -95,8 +116,19 @@ class CalendarsController < ApplicationController
       i = 0
       availibilities_for_day = []
       availibilities_for_day << free_time_after_wake_up(busy, date) unless free_time_after_wake_up(busy, date).nil?
-      while i < busy.length - 1
-        availibilities_for_day << { start: busy[i][:end], end: busy[i + 1][:start] }
+      while i < busy.length
+        if busy[i + 1].nil?
+          start_time = busy[i][:end]
+          end_time = bedtime(date)
+        else
+          start_time = busy[i][:end]
+          end_time =  busy[i + 1][:start]
+        end
+        
+        if availability_is_within_waking_hours?({start: start_time, end: end_time}, wakeup_time(date), bedtime(date))
+          availibilities_for_day << { start: start_time, end: end_time } 
+        end
+
         i += 1
       end
       availibilities_for_day << free_time_before_sleep(busy, date) unless free_time_before_sleep(busy, date).nil?
@@ -115,7 +147,7 @@ class CalendarsController < ApplicationController
       last_busy_day = busys.last[:start]
     else
       free_days_num = 5
-      last_busy_day = DateTime.now + 4.days
+      last_busy_day = DateTime.now + 2.days
     end   
 
     i = 1
@@ -145,7 +177,6 @@ class CalendarsController < ApplicationController
     end
   end
 
-
   # Still need to find a way to integrate user input for wake up and sleep time
   def free_time_after_wake_up(busy, date)
     wake_up = DateTime.new(date.year, date.month, date.day, 8, 0, 0, '-04:00')
@@ -171,14 +202,15 @@ class CalendarsController < ApplicationController
 
   # This is really clever ye :D, Nice job!
   def seperate_busys_by_date(busys)
-    current_day = DateTime.now
-    new_busys = []
-    # for current_day in current_day..(busys.last[:start].day)
-    until busys.last.nil? || current_day > busys.last[:end]
-      new_busys << busys.select { |busy| busy[:start].day == current_day.day }
-      current_day += 1
-    end
-    new_busys
+    busys.group_by { |busy| busy[:start].day }.values
+    # current_day = DateTime.now
+    # new_busys = []
+    # # for current_day in current_day..(busys.last[:start].day)
+    # until busys.last.nil? || current_day > busys.last[:end]
+    #   new_busys << busys.select { |busy| busy[:start].day == current_day.day }
+    #   current_day += 1
+    # end
+    # new_busys
   end
 
   def calculate_time(availibility)
@@ -325,11 +357,12 @@ class CalendarsController < ApplicationController
     availibilities.each do |availibility|
       @all_in_one_availibility = get_all_interval_time_slot_in_one_availibility(availibility)
       suitable_interval_time_slots = @all_in_one_availibility.select do |e|
-        all_event_weathers_good?(each_interval_weather(e), activity)
+        all_event_weathers_good?(get_weather_at_interval(e), activity)
       end
       @a = merge_all_squent_suitable_time_slots_in_each_availibility(suitable_interval_time_slots)
       all_candidates_from_each_merged << find_longest_suitale_time_slot_from_one_merged(@a) unless find_longest_suitale_time_slot_from_one_merged(@a).nil?
     end
+    # binding.pry
     all_candidates_from_each_merged.sort_by! { |e| e[:end] - e[:start] }.last
   end
 

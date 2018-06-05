@@ -25,7 +25,7 @@ class User < ApplicationRecord
     user
   end
 
-  def generate_activityies
-    WeadaCalenderGeneration.run(self)
-  end
+  # def generate_activityies
+  #   WeadaCalenderGeneration.run(self)
+  # end
 end
