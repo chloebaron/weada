@@ -8,5 +8,7 @@ function handleEvent(_, t) {
 
   checkbox.checked = !checkbox.checked
 
-  activity = document.querySelector(".activity-wrapper-" + t.classList.value ).classList.toggle("hidden")
+  activityHiddenToggle = document.querySelector(".activity-wrapper-" + t.classList.value ).classList.toggle("hidden")
+  activityCardColor = document.querySelector(".option-" + t.classList.value).classList.toggle("chosen")
 }
+
