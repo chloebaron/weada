@@ -5,6 +5,20 @@ class CalendarsController < ApplicationController
   end
 
   def display_weada_calendar
+    require 'google/apis/calendar_v3'
+    require 'google/api_client/client_secrets.rb'
+
+    secrets = Google::APIClient::ClientSecrets.new({
+      "web" => {
+        "refresh_token" => current_user.refresh_token,
+        "client_id" => ENV["GOOGLE_CLIENT_ID"],
+        "client_secret" => ENV["GOOGLE_CLIENT_SECRET"]
+      }
+    })
+
+    @service = Google::Apis::CalendarV3::CalendarService.new
+    @service.authorization = secrets.to_authorization
+    @service.authorization.refresh!
     # get_client_session # => @client
     find_weada_calendar() # => @weada_calendar
 
@@ -14,7 +28,7 @@ class CalendarsController < ApplicationController
   def callback
     # require 'google/apis/calendar_v3'
     # require 'google/api_client/client_secrets.rb'
-    
+
     # current_user.generate_activites
 
     # secrets = Google::APIClient::ClientSecrets.new({
@@ -101,11 +115,11 @@ class CalendarsController < ApplicationController
   end
 
   def wakeup_time(date)
-    DateTime.new(date.year, date.month, date.day, 8, 0, 0, '-04:00')
+    DateTime.new(date.year, date.month, date.day, current_user.wake_up_hour.to_i, 0, 0, '-04:00')
   end
 
   def bedtime(date)
-    DateTime.new(date.year, date.month, date.day, 22, 0, 0, '-04:00')
+    DateTime.new(date.year, date.month, date.day, current_user.sleep_hour.to_i, 0, 0, '-04:00')
   end
 
   def availibilities(busys) # => array of the times you are available in order of day
@@ -124,9 +138,9 @@ class CalendarsController < ApplicationController
           start_time = busy[i][:end]
           end_time =  busy[i + 1][:start]
         end
-        
+
         if availability_is_within_waking_hours?({start: start_time, end: end_time}, wakeup_time(date), bedtime(date))
-          availibilities_for_day << { start: start_time, end: end_time } 
+          availibilities_for_day << { start: start_time, end: end_time }
         end
 
         i += 1
@@ -147,8 +161,10 @@ class CalendarsController < ApplicationController
       last_busy_day = busys.last[:start]
     else
       free_days_num = 5
-      last_busy_day = DateTime.now + 2.days
-    end   
+
+      last_busy_day = DateTime.now
+
+    end
 
     i = 1
     for i in 1..free_days_num
@@ -199,18 +215,8 @@ class CalendarsController < ApplicationController
     end
   end
 
-
-  # This is really clever ye :D, Nice job!
   def seperate_busys_by_date(busys)
     busys.group_by { |busy| busy[:start].day }.values
-    # current_day = DateTime.now
-    # new_busys = []
-    # # for current_day in current_day..(busys.last[:start].day)
-    # until busys.last.nil? || current_day > busys.last[:end]
-    #   new_busys << busys.select { |busy| busy[:start].day == current_day.day }
-    #   current_day += 1
-    # end
-    # new_busys
   end
 
   def calculate_time(availibility)
@@ -395,7 +401,7 @@ class CalendarsController < ApplicationController
   end
 
   def find_weada_calendar()
-    # list_calendars(client)
+    list_calendars()
     @weada_calendar = @calendar_list.find {|calendar| calendar.summary == "Weada"}
     @weada_calendar
   end
