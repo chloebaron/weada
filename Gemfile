@@ -21,10 +21,10 @@ gem 'pundit'
 
 gem 'omniauth-google-oauth2'
 
-# gem 'google-api-client'#, require: 'google/apis/calendar_v3'
+gem 'google-api-client', require: 'google/apis/calendar_v3'
 # gem 'google-api-client', require: 'google/api_client'
 # gem 'google-api-client', '0.8.2'
-gem 'google-api-client', '0.11', require: 'google/apis/drive_v2' 
+# gem 'google-api-client', '0.11', require: 'google/apis/drive_v2'
 
 group :development do
   gem 'web-console', '>= 3.3.0'
