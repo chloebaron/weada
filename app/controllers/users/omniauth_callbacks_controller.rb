@@ -16,7 +16,7 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
     # @client = Google::APIClient.new
     # @service = @client.discovered_api('calendar', 'v3')
 
-    byebug
+    # byebug
 
     # You need to implement the method below in your model (e.g. app/models/user.rb)
     @user = User.from_omniauth(auth)

@@ -1,12 +1,14 @@
 #sidebar {
-  height: calc(100vh - 70px);
-  justify-content: space around;
-  flex: 0 0 450px;
-  position: sticky !important;
-  top: 0 !important;
+  justify-content: space-around;
+  flex: 0 0 39%;
   background: linear-gradient(179.42deg, rgba(80, 227, 142, 0) 45.01%,
     rgba(81, 187, 125, 0.295) 72.81%), rgba(56, 165, 152, 0.75);
 
+  // These were used for keeping the sidebar as sticky
+
+  height: calc(100vh - 70px);
+  position: sticky !important;
+  top: 0 !important;
 }
 
 .form-design {
@@ -37,3 +39,12 @@
   }
 }
 
+.selected-activities-container {
+  width: 100%;
+  height: calc(100vh - 127px);
+  overflow-y: scroll;
+
+  .card {
+    margin: 10px auto;
+  }
+}

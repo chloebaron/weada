@@ -11,15 +11,22 @@
 }
 
 /* Logo */
-.navbar-wagon-brand img {
-  height: 50px;
+.navbar-logo a {
+  font-size: 16px;
+  text-decoration: none;
+  color: $weada-green;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 /* User Avatar */
 .navbar-wagon .avatar {
   height: 35px;
-  width: 35px;
+  width: 50px;
   border-radius: 50%;
+  opacity: 0.8;
 }
 
 /* Right section */
@@ -41,7 +48,7 @@
   font-size: 14px;
 }
 .navbar-wagon-link:hover {
-  color: #da552f;
+  color: $weada-green;
   text-decoration: none;
 }
 

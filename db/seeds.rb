@@ -2,6 +2,7 @@
 # User.create(email: "user@user.com", password: "testing")
 Activity.destroy_all
 User.destroy_all
+UserEvent.destroy_all
 
 
 User.create!(
@@ -12,6 +13,13 @@ User.create!(
   address: " 5333 Avenue Casgrain #102, Montréal, QC H2T 1X6" #.strip.gsub(/\s+/, " ").gsub(/(\(|\)|\#)/, "").unicode_normalize(:nfkd).encode('ASCII', replace: '')
   )
 
+  User.create!(
+  email: "test2@test.com",
+  password: "testing",
+  first_name: "john",
+  last_name: "johnson",
+  address: " yo mama" #.strip.gsub(/\s+/, " ").gsub(/(\(|\)|\#)/, "").unicode_normalize(:nfkd).encode('ASCII', replace: '')
+  )
 
 {
   "run" => {
@@ -85,40 +93,7 @@ User.create!(
     warm_required: false,
     dry_required: false,
     calm_required: false
-  },
-  "cafe" => {
-    name: "cafe",
-    description: "Sit in a Cafe",
-    sunny_required: false,
-    warm_required: false,
-    dry_required: false,
-    calm_required: false
   }
 }.values.each do |e|
  Activity.create(e)
 end
-
-# geo_url = "https://maps.googleapis.com/maps/api/geocode/json?address=Montreal,QC&key=#{ENV["GOOGLE_API_LEO"]}"
-# geo_json = open(geo_url).read
-# geocode = JSON.parse(geo_json)
-# geo_location = geocode["results"][0]["geometry"]["location"]
-
-# weather_url = "https://api.darksky.net/forecast/#{ENV["DARKSKY_API_LEO"]}/#{geo_location['lat']},#{geo_location['lng']}"
-# weather_json = open(weather_url).read
-# weather = JSON.parse(weather_json)
-
-# next_168_hours = [weather["hourly"]["data"]]
-
-# next_168_hours.each do |weather_condition|
-#   HourlyWeather.create!(
-#   temperature: weather_condition["temperatureHigh"],
-#   apparent_temperature: weather_condition["apparentTemperatureHigh"],
-#   cloud_cover: weather_condition["cloudCover"],
-#   wind_speed: weather_condition["windSpeed"],
-#   precip_probability: weather_condition["precipProbability"],
-#   precip_type: weather_condition["precipType"],
-#   time: weather_condition["time"]
-#   )
-# end
-
-
