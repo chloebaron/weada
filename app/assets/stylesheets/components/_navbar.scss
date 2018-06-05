@@ -11,11 +11,14 @@
 }
 
 /* Logo */
-.fa-bolt {
-  font-size: 24px;
+.navbar-logo a {
+  font-size: 16px;
   text-decoration: none;
   color: $weada-green;
   font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* User Avatar */
