@@ -160,8 +160,9 @@ class UserEventsController < CalendarsController
 
   def find_best_times_for_chosen_activities(selected_activities, new_busys, availibilities)
     selected_activities.each do |user_event|
-      find_optimal_availabilities(availibilities, user_event) # => @filtered
-
+      availibilities = get_availibilities(new_busys)
+      find_optimal_availabilities(availibilities, user_event)
+      byebug # => @filtered
       if @filtered.empty?
         time_slot = recommend_longest_suitable_time_slot_from_all_availibilities(availibilities, user_event.activity)
 
@@ -176,10 +177,7 @@ class UserEventsController < CalendarsController
         @all_possibilities_insert_event = combine_possibilities(@interval_slot_possiblilities, @duration_slot_possiblilities)
 
         if @all_possibilities_insert_event.empty?
-          time_slot = unless recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, user_event.activity).nil?
-            recommend_longest_suitable_time_slot_from_all_availibilities(availibilities, user_event.activity)
-          end
-
+          time_slot = recommend_longest_suitable_time_slot_from_all_availibilities(availibilities, user_event.activity)  unless recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, user_event.activity).nil?
           user_event.update(duration: calculate_time(time_slot))
           user_event.update(start_time: time_slot[:start], end_time: time_slot[:end], status: 1)
         else
@@ -189,7 +187,7 @@ class UserEventsController < CalendarsController
         end
 
         # Add new event to busys sp that it's taken into consideration when the next event is added
-        new_busys << @all_possibilities_insert_event.first
+        new_busys << time_slot
       end
     end
   end
