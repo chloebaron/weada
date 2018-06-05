@@ -7,6 +7,8 @@
          <div class="<%= activity.id %>" onclick="handleEvent(event, this)">
           <div class="card activity">
             <div class="icon">
+              <!-- To use with svg file dynamically with activity names -->
+              <!-- <span class="<%# activity.name %>-fill"><%# inline_svg(activity.name) %></span>  -->
               <i class="fa fa-<%= @icons[activity.name.to_sym] %> <%= activity.name %>-color  fa-lg"></i>
             </div>
             <div class="activity-card-name <%= activity.name %>-color">
@@ -24,14 +26,16 @@
       <div class="selected-activities-container">
         <% @activities.each do |activity| %>
             <div class="card hidden activity-wrapper-<%= activity.id %>"
-              <%# check_box_tag 'activity_ids[]', activity.id %>
-              <%# image_tag "#{activity.name}.png" %>
               <input type="checkbox" name="activity_ids[]" id="<%= activity.id %>" value="<%= activity.id %>" class="hidden">
-            <div class="card-name <%= activity.name %>-color">
-              <%= activity.description %>
-            </div>
-            <div class="duration-select">
+              <div class="card-name <%= activity.name %>-color">
+                <%= activity.name.capitalize %>
+              </div>
+              <div class="icon">
+                <i class="fa fa-<%= @icons[activity.name.to_sym] %> <%= activity.name %>-color  fa-lg"></i>
+              </div>
+              <div class="duration-select">
               <%= select(:user_events, activity.id, [['30', 30], ['60', 60], ['90', 90], ['120', 120]], include_blank: true) %>
+              </div>
             </div>
         <% end %>
         <div class="btn btn-save"><%= submit_tag 'Create Schedule' %></div>
