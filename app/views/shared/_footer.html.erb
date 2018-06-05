@@ -1,14 +1,17 @@
 <div class="footer">
-  <div class="footer-links">
+  <div class="footer-links left">
     <%= link_to dashboard_path do %>
       <i class="fa fa-bolt" aria-hidden="true"></i>
     <% end %>
     <%= link_to activities_path do %>
       <i class="fa fa-cloud" aria-hidden="true"></i>
     <% end %>
-    <a href="#"><i class="fa fa-google"></i></a>
+    <a href="#"><i class="fa fa-thermometer-half"></i></a>
 <!--<a href="#"><i class="fa fa-cloud"></i></a>
     <a href="#"><i class="fa fa-github"></i></a>
     <a href="#"><i class="fa fa-facebook"></i></a> -->
+  </div>
+  <div class="footer-right">
+     <%= link_to(image_tag("poweredby"), "https://darksky.net/poweredby/") %>
   </div>
 </div>
