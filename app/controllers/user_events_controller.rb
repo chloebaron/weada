@@ -11,12 +11,11 @@ class UserEventsController < CalendarsController
     UserEvent.where(status: 0).destroy_all
     params[:user_events].keys.each do |activity_id|
       activity = Activity.find(activity_id.to_i)
-
       if params[:user_events][activity_id] != ""
         UserEvent.create!(user: current_user, activity: activity, status: 0, duration: params[:user_events][activity_id].to_i)
       end
     end
-    redirect_to redirect_path
+    redirect_to callback_path
   end
 
   # METHODS USED ARE PRIVATE #
