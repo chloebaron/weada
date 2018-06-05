@@ -5,7 +5,7 @@
         <% @activities.each do |activity| %>
         <div class="col-xs-12 col-sm-6 col-md-4">
          <div class="<%= activity.id %>" onclick="handleEvent(event, this)">
-          <div class="card activity">
+          <div class="card option-<%= activity.id %> activity">
             <div class="icon">
               <!-- To use with svg file dynamically with activity names -->
               <!-- <span class="<%# activity.name %>-fill"><%# inline_svg(activity.name) %></span>  -->
