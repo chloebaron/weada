@@ -5,6 +5,20 @@ class CalendarsController < ApplicationController
   end
 
   def display_weada_calendar
+    require 'google/apis/calendar_v3'
+    require 'google/api_client/client_secrets.rb'
+
+    secrets = Google::APIClient::ClientSecrets.new({
+      "web" => {
+        "refresh_token" => current_user.refresh_token,
+        "client_id" => ENV["GOOGLE_CLIENT_ID"],
+        "client_secret" => ENV["GOOGLE_CLIENT_SECRET"]
+      }
+    })
+
+    @service = Google::Apis::CalendarV3::CalendarService.new
+    @service.authorization = secrets.to_authorization
+    @service.authorization.refresh!
     # get_client_session # => @client
     find_weada_calendar() # => @weada_calendar
 
@@ -14,7 +28,7 @@ class CalendarsController < ApplicationController
   def callback
     # require 'google/apis/calendar_v3'
     # require 'google/api_client/client_secrets.rb'
-    
+
     # current_user.generate_activites
 
     # secrets = Google::APIClient::ClientSecrets.new({
@@ -124,9 +138,9 @@ class CalendarsController < ApplicationController
           start_time = busy[i][:end]
           end_time =  busy[i + 1][:start]
         end
-        
+
         if availability_is_within_waking_hours?({start: start_time, end: end_time}, wakeup_time(date), bedtime(date))
-          availibilities_for_day << { start: start_time, end: end_time } 
+          availibilities_for_day << { start: start_time, end: end_time }
         end
 
         i += 1
@@ -148,7 +162,7 @@ class CalendarsController < ApplicationController
     else
       free_days_num = 5
       last_busy_day = DateTime.now + 2.days
-    end   
+    end
 
     i = 1
     for i in 1..free_days_num
@@ -395,7 +409,7 @@ class CalendarsController < ApplicationController
   end
 
   def find_weada_calendar()
-    # list_calendars(client)
+    list_calendars()
     @weada_calendar = @calendar_list.find {|calendar| calendar.summary == "Weada"}
     @weada_calendar
   end
