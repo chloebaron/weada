@@ -203,14 +203,14 @@ class CalendarsController < ApplicationController
   def move_forward_to_next_interval(event, duration_input)
     minutes_from_one_hour = 60 - event[:start].minute
     event[:start] += minutes_from_one_hour.minute # move forward into next hour
-    event[:start] -= event[:start].second
+    event[:start] -= event[:start].second.second
     event[:end] = event[:start] + duration_input.minute
     event
   end
 
   def move_forward_by_duration(event, duration_input)
     event[:start] += duration_input.minute
-    event[:start] -= event[:start].second
+    event[:start] -= event[:start].second.second
     event[:end] = event[:start] + duration_input.minute
     event
   end
