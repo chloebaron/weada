@@ -1,39 +1,30 @@
-<div class="routine-flexbox-wrapper">
+<div class="wrapper routine ">
   <div class="banner-vertical">
-
+    <%= image_tag "clock.png" %>
   </div>
-
   <div id="routine-form-wrapper" class="container">
     <div id="routine-form">
       <h2>Let’s get started! Tell us a bit about your routine.</h2>
       <%= form_tag(new_user_registration_path, method: "post") do %>
-          <div class="row form-group">
-            <%= label_tag(:wake_up_hour, "Wake up time: ", class: "col-sm-4 col-form-label") %>
-            <div class="col-sm-6">
-              <%= select_tag(:wake_up_hour, options_for_select((0..23).to_a), class: 'form-control')%>
-            </div>
+          <div class="time-field-group form-group">
+            <%= label_tag(:wake_up_hour, "Wake Up Time") %>
+            <%= select_tag(:wake_up_hour, options_for_select((0..23).to_a), class: 'form-control routine')%>
           </div>
-          <div class="row form-group">
-            <%= label_tag(:sleep_hour, "Sleep time: ", class: "col-sm-4 col-form-label") %>
-            <div class="col-sm-6">
-              <%= select_tag(:sleep_hour, options_for_select((0..23).to_a), class: 'form-control')%>
-            </div>
+          <div class="time-field-group form-group">
+            <%= label_tag(:sleep_hour, "Sleep Time") %>
+            <%= select_tag(:sleep_hour, options_for_select((0..23).to_a), class: 'form-control routine')%>
           </div>
-        <h3>If you work Monday-Friday, tell us you work hours.</h3>
-          <div class="row form-group">
-            <%= label_tag(:start_time, "Start time: ", class: "col-sm-4 col-form-label") %>
-            <div class="col-sm-6">
-              <%= select_tag(:start_time, options_for_select((0..23).to_a), class: 'form-control')%>
-            </div>
+        <h3>If you work Monday-Friday, tell us your work hours.</h3>
+          <div class="time-field-group form-group">
+            <%= label_tag(:start_time, "Start Time") %>
+            <%= select_tag(:start_time, options_for_select((0..23).to_a), class: 'form-control routine')%>
           </div>
-          <div class="row form-group">
-            <%= label_tag(:sleep_hour, "End time: ", class: "col-sm-4 col-form-label") %>
-            <div class="col-sm-6">
-              <%= select_tag(:sleep_hour, options_for_select((0..23).to_a), class: 'form-control')%>
-            </div>
+          <div class="time-field-group form-group">
+            <%= label_tag(:sleep_hour, "End Time") %>
+            <%= select_tag(:sleep_hour, options_for_select((0..23).to_a), class: 'form-control routine')%>
           </div>
           <div class="text-center">
-            <%= submit_tag("Next", class: "btn btn-lg") %>
+            <%= submit_tag("Next", class: "btn btn-primary btn-md") %>
           </div>
       <% end %>
     </div>
