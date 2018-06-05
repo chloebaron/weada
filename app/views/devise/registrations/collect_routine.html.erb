@@ -1,0 +1,42 @@
+<div class="routine-flexbox-wrapper">
+  <div class="banner-vertical">
+
+  </div>
+
+  <div id="routine-form-wrapper" class="container">
+    <div id="routine-form">
+      <h2>Let’s get started! Tell us a bit about your routine.</h2>
+      <%= form_tag(new_user_registration_path, method: "get") do %>
+          <div class="row form-group">
+            <%= label_tag(:wake_up_hour, "Wake up time: ", class: "col-sm-4 col-form-label") %>
+            <div class="col-sm-6">
+              <%= select_tag(:wake_up_hour, options_for_select((0..23).to_a), class: 'form-control')%>
+            </div>
+          </div>
+          <div class="row form-group">
+            <%= label_tag(:sleep_hour, "Sleep time: ", class: "col-sm-4 col-form-label") %>
+            <div class="col-sm-6">
+              <%= select_tag(:sleep_hour, options_for_select((0..23).to_a), class: 'form-control')%>
+            </div>
+          </div>
+        <h3>If you work Monday-Friday, tell us you work hours.</h3>
+          <div class="row form-group">
+            <%= label_tag(:start_time, "Start time: ", class: "col-sm-4 col-form-label") %>
+            <div class="col-sm-6">
+              <%= select_tag(:start_time, options_for_select((0..23).to_a), class: 'form-control')%>
+            </div>
+          </div>
+          <div class="row form-group">
+            <%= label_tag(:sleep_hour, "End time: ", class: "col-sm-4 col-form-label") %>
+            <div class="col-sm-6">
+              <%= select_tag(:sleep_hour, options_for_select((0..23).to_a), class: 'form-control')%>
+            </div>
+          </div>
+          <div class="text-center">
+            <%= submit_tag("Next", class: "btn btn-lg") %>
+          </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
