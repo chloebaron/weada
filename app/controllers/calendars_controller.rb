@@ -115,11 +115,11 @@ class CalendarsController < ApplicationController
   end
 
   def wakeup_time(date)
-    DateTime.new(date.year, date.month, date.day, 8, 0, 0, '-04:00')
+    DateTime.new(date.year, date.month, date.day, current_user.wake_up_hour.to_i, 0, 0, '-04:00')
   end
 
   def bedtime(date)
-    DateTime.new(date.year, date.month, date.day, 22, 0, 0, '-04:00')
+    DateTime.new(date.year, date.month, date.day, current_user.sleep_hour.to_i, 0, 0, '-04:00')
   end
 
   def availibilities(busys) # => array of the times you are available in order of day
@@ -161,7 +161,9 @@ class CalendarsController < ApplicationController
       last_busy_day = busys.last[:start]
     else
       free_days_num = 5
-      last_busy_day = DateTime.now + 2.days
+
+      last_busy_day = DateTime.now
+
     end
 
     i = 1
@@ -213,18 +215,8 @@ class CalendarsController < ApplicationController
     end
   end
 
-
-  # This is really clever ye :D, Nice job!
   def seperate_busys_by_date(busys)
     busys.group_by { |busy| busy[:start].day }.values
-    # current_day = DateTime.now
-    # new_busys = []
-    # # for current_day in current_day..(busys.last[:start].day)
-    # until busys.last.nil? || current_day > busys.last[:end]
-    #   new_busys << busys.select { |busy| busy[:start].day == current_day.day }
-    #   current_day += 1
-    # end
-    # new_busys
   end
 
   def calculate_time(availibility)

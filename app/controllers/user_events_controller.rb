@@ -159,7 +159,7 @@ class UserEventsController < CalendarsController
     @availibilities = availibilities(new_busys_seperated)
 
     # add the availbilities of the days where there are no activities
-    @availibilities += free_day_availibilities(new_busys, 8, 22)
+    @availibilities += free_day_availibilities(new_busys, current_user.wake_up_hour.to_i, current_user.sleep_hour.to_i)
   end
 
   def find_optimal_availabilities(availibilities, user_event)
