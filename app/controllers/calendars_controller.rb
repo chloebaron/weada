@@ -152,14 +152,15 @@ class CalendarsController < ApplicationController
 
   # This is really clever ye :D, Nice job!
   def seperate_busys_by_date(busys)
-    current_day = DateTime.now
-    new_busys = []
+    busys.group_by { |busy| busy[:start].day }.values
+    # current_day = DateTime.now
+    # new_busys = []
 
-    until current_day > busys.last[:end]
-      new_busys << busys.select { |busy| busy[:start].day == current_day.day }
-      current_day += 1
-    end
-    new_busys
+    # until current_day > busys.last[:end]
+    #   new_busys << busys.select { |busy| busy[:start].day == current_day.day }
+    #   current_day += 1
+    # end
+    # new_busys
   end
 
   def calculate_time(availibility)
