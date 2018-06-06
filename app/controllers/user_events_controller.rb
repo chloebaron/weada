@@ -1,10 +1,7 @@
 class UserEventsController < CalendarsController
   before_action :authenticate_user!, only: [:create]
   before_action :set_event, only: [:edit, :update]
-
-  def following_five_days
-    UserEvent.where(currer)
-  end
+  before_action :following_five_days, only: :dashboard
 
   def new
     @user_event = UserEvent.new
@@ -101,7 +98,7 @@ class UserEventsController < CalendarsController
   end
 
   def dashboard
-    @events = UserEvent.where(user: current_user, status: 0)
+
   end
 
   # def destroy
@@ -109,12 +106,35 @@ class UserEventsController < CalendarsController
 
   private
 
+  def following_five_days
+    five_days_user_events = UserEvent.where("user_id = ? AND start_time >= ? AND start_time <= ?",
+      current_user.id,
+      DateTime.now,
+      DateTime.now + 4.day
+      )
+    five_days_user_events = five_days_user_events.group_by { |user_event| user_event.start_time.day }.values
+    five_days_user_events.sort_by! { |user_events| user_events.first.start_time }
+    @schedule_hash = {}
+    for i in 0..4
+      correspond_day_user_events = five_days_user_events.find{ |user_events| user_events.first.start_time.day == (DateTime.now + i.day).day }
+
+      @schedule_hash[convert_to_day_of_week((DateTime.now + i.day).cwday)] = correspond_day_user_events || ""
+      i += 1
+    end
+    @schedule_hash
+  end
+
   def event_params
     params.permit(:activity_ids)
   end
 
   def set_event
     @event = UserEvent.find_by(id: params[:id])
+  end
+
+  def convert_to_day_of_week(cwday)
+    weekday_hash = { 1 => "Monday", 2 => "Tuesday", 3 => "Wednesday", 4=> "Thursday", 5 => "Friday", 6 => "Saturday", 7 => "Sunday"}
+    weekday_hash[cwday]
   end
 
   # METHODS USED (IN ORDER) FOR THE 'generate_calendar' METHOD #
