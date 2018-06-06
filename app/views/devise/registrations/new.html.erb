@@ -11,8 +11,8 @@
           <%= f.input :email, required: true%>
           <%= f.input :password, required: true, hint: ("#{@minimum_password_length} characters minimum" if @minimum_password_length) %>
           <%= f.input :password_confirmation, required: true %>
-          <%= f.input :work_start_time, :as => :hidden, :input_html => { :value => params[:start_time] } %>
-          <%= f.input :work_end_time, :as => :hidden, :input_html => { :value => params[:end_time] } %>
+          <%= f.input :work_start_time, :as => :hidden, :input_html => { :value => params[:work_start_time] } %>
+          <%= f.input :work_end_time, :as => :hidden, :input_html => { :value => params[:work_end_time] } %>
           <%= f.input :wake_up_hour, :as => :hidden, :input_html => { :value => params[:wake_up_hour] } %>
           <%= f.input :sleep_hour, :as => :hidden, :input_html => { :value => params[:sleep_hour] } %>
 
@@ -24,8 +24,8 @@
     </div>
     <% end %>
   </div>
-
+<!--
   <div class="banner-vertical">
 
-  </div>
+  </div> -->
 </div>

@@ -2,7 +2,13 @@
   <div id="landing-content">
     <h1>Weada</h1>
     <h2>Optimizing your day for the weather.</h2>
-    <div class="btn btn-signup"><%= link_to "Get Started", activities_path %></div>
+    <div class="btn btn-signup">
+      <% if @user %>
+        <%= link_to "Get Started", activities_path %>
+      <% else %>
+        <%= link_to "Get Started", users_registrations_collect_routine_path %>
+      <% end %>
+    </div>
   </div>
 <!--   <%= inline_svg("yoga") %> -->
 </div>
