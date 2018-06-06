@@ -156,6 +156,7 @@ class CalendarsController < ApplicationController
 
       availibilities << availibilities_for_day
     end
+    end
     availibilities.flatten
   end
 
