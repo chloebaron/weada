@@ -4,16 +4,15 @@ class Users::RegistrationsController < Devise::RegistrationsController
   # before_action :configure_sign_up_params, only: [:create]
   # before_action :configure_account_update_params, only: [:update]
   def collect_routine
+
   end
 
   protected
 
   def after_sign_up_path_for(resource)
     user_google_oauth2_omniauth_authorize_path # Or :prefix_to_your_route
+    # redirect_to activities_path
   end
-  # def create
-
-  # end
 
   # GET /resource/sign_up
   # def new
@@ -70,4 +69,10 @@ class Users::RegistrationsController < Devise::RegistrationsController
   # def after_inactive_sign_up_path_for(resource)
   #   super(resource)
   # end
+
+  private
+
+  def new_user_params
+    params.require(:user).permit(:first_name, :last_name, :password, :password_confirmation, :email, :sleep_hour, :wake_up_hour, :work_start_time, :work_end_time)
+  end
 end
