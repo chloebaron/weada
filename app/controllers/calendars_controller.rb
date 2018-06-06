@@ -148,16 +148,14 @@ class CalendarsController < ApplicationController
         )
           availibilities_for_day << { start: start_time, end: end_time }
         end
+      availibilities << availibilities_for_day
+      end
 
       unless free_time_before_sleep(busies, date).nil?
         availibilities_for_day << free_time_before_sleep(busies, date)
       end
 
-
-      availibilities << availibilities_for_day
-      end
-    end
-    end
+     end
     availibilities.flatten
   end
 
@@ -428,6 +426,10 @@ class CalendarsController < ApplicationController
     free_busy_request_item.id = id
     free_busy_request.items = [ free_busy_request_item ]
     @service.query_freebusy(free_busy_request)
+  end
+
+  def natural(user_events)
+
   end
 
   # def client_options

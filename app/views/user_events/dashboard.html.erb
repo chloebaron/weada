@@ -2,14 +2,11 @@
   <h1>Hello User</h1>
   <div class="btn btn-create-schedule"><%= link_to "Create Schedule!", activities_path %></div>
   <div class="upcoming-events">
-    <% UserEvent.all.each do |event| %>
-    <div class="card schedule-card";>
-      <div class="event-name"><h4><%= event.activity.description %></h4></div>
-      <div class="event-time">
-      <p><%= event.start_time.strftime("%l%M%p") %> - <%= event.end_time.strftime("%l%M%p") %></p>
-      </div>
+    <% @schedule_hash.each_pair %>
+
     </div>
-    <% end %>
+
+    <% raise %>
   </div>
 </div>
 
