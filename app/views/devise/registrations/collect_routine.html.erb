@@ -20,8 +20,8 @@
             <%= select_tag(:start_time, options_for_select((0..23).to_a), class: 'form-control routine')%>
           </div>
           <div class="time-field-group form-group">
-            <%= label_tag(:sleep_hour, "End Time") %>
-            <%= select_tag(:sleep_hour, options_for_select((0..23).to_a), class: 'form-control routine')%>
+            <%= label_tag(:end_time, "End Time") %>
+            <%= select_tag(:end_time, options_for_select((0..23).to_a), class: 'form-control routine')%>
           </div>
           <div class="text-center">
             <%= submit_tag("Next", class: "btn btn-primary btn-md") %>
@@ -30,4 +30,5 @@
     </div>
   </div>
 </div>
+
 

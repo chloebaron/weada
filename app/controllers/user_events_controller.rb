@@ -43,7 +43,7 @@ class UserEventsController < CalendarsController
 
     # get_client_session # => @client
     # get_service_methods() # => @service
-    get_weada_calendar() # => @weada_calendar
+    get_weada_calendar # => @weada_calendar
 
     free_busy = get_free_busy() # => free busy object
 
@@ -75,7 +75,7 @@ class UserEventsController < CalendarsController
     # Insert event into Weada calendar
     @selected_activities.each { |user_event| insert_weada_event(user_event, ) }
 
-    redirect_to display_weada_calendar_path
+    redirect_to dashboard_path
   end
 
 
@@ -161,8 +161,8 @@ class UserEventsController < CalendarsController
     end
   end
 
-  def get_weada_calendar()
-    ids = get_calendar_id()
+  def get_weada_calendar
+    ids = get_calendar_id
     @weada_calendar = ids.find { |id| id.summary == "Weada" }
     @weada_calendar ||= create_weada_calendar()
     # raise
