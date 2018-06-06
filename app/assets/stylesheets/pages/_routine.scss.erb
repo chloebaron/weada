@@ -5,29 +5,34 @@
   text-align: center;
 }
 
-#routine-form h2 {
+.routine-form h2 {
   font-size: 24px;
   margin-bottom: 20px;
 }
 
-#routine-form h3 {
+.routine-form h3 {
   font-size: 16px;
+  margin-bottom: 20px;
+  width: auto;
+}
+
+.routine-form p {
+  font-size: 16px;
+  font-weight: lighter;
   margin-bottom: 20px;
   width: auto;
 }
 
 .banner-vertical {
   width: 50%;
-  height: calc(100vh - 70px);
-  //background: linear-gradient(179.71deg, rgba(80, 227, 142, 0) 44.9%, rgba(81, 187, 125, 0.295) 73.01%), rgba(56, 165, 152, 0.75);
-  background: $weada-green;
+  height: 100vh;
+  background: linear-gradient(179.71deg, rgba(80, 227, 142, 0) 44.9%, rgba(81, 187, 125, 0.295) 73.01%), rgba(56, 165, 152, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-
-#routine-form {
+.routine-form {
   height: 50%;
   width: 70%;
   margin: 0 auto;
@@ -52,7 +57,16 @@
   margin-right: 15%;
 }
 
-#routine-form-wrapper {
+.form-control.string {
+  width: 75%;
+  margin-right: 10%;
+}
+.form-control.password {
+  width: 75%;
+  margin-right: 10%;
+}
+
+.routine-form-wrapper {
   display:flex;
   justify-content: space-around;
   width: 50%;

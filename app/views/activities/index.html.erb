@@ -27,9 +27,9 @@
         <% @activities.each do |activity| %>
             <div class="card hidden activity-wrapper-<%= activity.id %>"
               <input type="checkbox" name="activity_ids[]" id="<%= activity.id %>" value="<%= activity.id %>" class="hidden">
-              <div class="card-name <%= activity.name %>-color">
+              <!-- <div class="card-name <%= activity.name %>-color">
                 <%= activity.name.capitalize %>
-              </div>
+              </div> -->
               <div class="icon">
                 <i class="fa fa-<%= @icons[activity.name.to_sym] %> <%= activity.name %>-color  fa-lg"></i>
               </div>
@@ -38,7 +38,7 @@
               </div>
             </div>
         <% end %>
-        <div class="btn btn-save"><%= submit_tag 'Create Schedule' %></div>
+        <div class="btn btn-save"><%= submit_tag 'Create Schedule'%></i> </div>
       </div>
     <% end %>
   </div>

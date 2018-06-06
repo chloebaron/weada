@@ -1,6 +1,6 @@
 #sidebar {
   justify-content: space-around;
-  flex: 0 0 39%;
+  flex: 0 0 29%;
   background: linear-gradient(179.42deg, rgba(80, 227, 142, 0) 45.01%,
     rgba(81, 187, 125, 0.295) 72.81%), rgba(56, 165, 152, 0.75);
 
@@ -9,6 +9,7 @@
   height: calc(100vh - 70px);
   position: sticky !important;
   top: 0 !important;
+  min-width: 200px;
 }
 
 .form-design {
@@ -23,7 +24,6 @@
 .btn-save {
   padding: 15px;
   box-shadow: none;
-  background: rgba(255,255,255, 0.4);
   width: 100%;
   bottom: 0;
   position: absolute;
@@ -34,8 +34,9 @@
     background: none;
     color: white;
   }
-  :hover {
-
+  &:hover {
+     background: rgba(255,255,255, 0.4);
+     transition: all 0.25s ease-in-out;
   }
 }
 
