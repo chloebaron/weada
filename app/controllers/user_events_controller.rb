@@ -1,5 +1,5 @@
 class UserEventsController < CalendarsController
-  before_action :authenticate_user!, only: [:create]
+  before_action :authenticate_user!, only: [:create, :dashboard]
   before_action :set_event, only: [:edit, :update]
   before_action :following_five_days, only: :dashboard
 
@@ -99,7 +99,6 @@ class UserEventsController < CalendarsController
 
   def dashboard
     @time_zone = ActiveSupport::TimeZone.new("Eastern Time (US & Canada)")
-    @schedule_hash.values.map { |user_events| user_events }
   end
 
   # def destroy
@@ -197,6 +196,9 @@ class UserEventsController < CalendarsController
     events = UserEvent.all
     @selected_activities = events.find_all { |event| event.user_id == current_user.id && event.status == 0 }
     # @selected_activities = [UserEvent.create(user: current_user, activity: Activity.first, duration: 60)]
+    @selected_activities.each do |user_event|
+      user_event.update duration: user_event.duration + 30
+    end
   end
 
   def find_best_times_for_chosen_activities(selected_activities, new_busys, availibilities)
@@ -208,7 +210,7 @@ class UserEventsController < CalendarsController
         time_slot = recommend_longest_suitable_time_slot_from_all_availibilities(availibilities, user_event.activity)
 
         # update the user event
-        user_event.update(start_time: time_slot[:start], end_time: time_slot[:end], duration: calculate_time(time_slot), status: 1)
+        user_event.update(start_time: time_slot[:start] + 15.minutes, end_time: time_slot[:end], duration: calculate_time(time_slot) - 30, status: 1)
 
         # Add new event to busys sp that it's taken into consideration when the next event is added
         new_busys << recommend_longest_suitable_time_slot_from_all_availibilities(availibilities, user_event.activity)
@@ -219,12 +221,12 @@ class UserEventsController < CalendarsController
 
         if @all_possibilities_insert_event.empty?
           time_slot = recommend_longest_suitable_time_slot_from_all_availibilities(availibilities, user_event.activity)  unless recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, user_event.activity).nil?
-          user_event.update(duration: calculate_time(time_slot))
-          user_event.update(start_time: time_slot[:start], end_time: time_slot[:end], status: 1)
+          user_event.update(duration: calculate_time(time_slot) - 30)
+          user_event.update(start_time: time_slot[:start] + 15.minutes, end_time: time_slot[:end], status: 1)
         else
-          time_slot = @all_possibilities_insert_event.first
-          user_event.update(duration: calculate_time(time_slot))
-          user_event.update(start_time: time_slot[:start], end_time: time_slot[:end], status: 1)
+          time_slot = @all_possibilities_insert_event.sample
+          user_event.update(duration: calculate_time(time_slot) - 30)
+          user_event.update(start_time: time_slot[:start] + 15.minutes, end_time: time_slot[:end], status: 1)
         end
 
         # Add new event to busys sp that it's taken into consideration when the next event is added
