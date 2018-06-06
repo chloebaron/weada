@@ -122,75 +122,59 @@ class CalendarsController < ApplicationController
     DateTime.new(date.year, date.month, date.day, current_user.sleep_hour.to_i, 0, 0, '-04:00')
   end
 
-  def availibilities(busys) # => array of the times you are available in order of day
-    busys.reject! { |busy| busy.empty? }
+  def availibilities(days_of_busies) # => array of the times you are available in order of day
+    days_of_busies.reject! { |busy| busy.empty? }
     availibilities = []
-    busys.each do |busy|
-      date = busy[0][:start]
-      i = 0
+    days_of_busies.each do |busies|
+      date = busies.first[:start]
       availibilities_for_day = []
-      availibilities_for_day << free_time_after_wake_up(busy, date) unless free_time_after_wake_up(busy, date).nil?
-      while i < busy.length
-        if busy[i + 1].nil?
-          start_time = busy[i][:end]
-          end_time = bedtime(date)
-        else
-          start_time = busy[i][:end]
-          end_time =  busy[i + 1][:start]
+        unless free_time_after_wake_up(busies, date).nil?
+          availibilities_for_day << free_time_after_wake_up(busies, date)
         end
 
-        if availability_is_within_waking_hours?({start: start_time, end: end_time}, wakeup_time(date), bedtime(date))
+      busies.each_with_index do |busy, index|
+        if busies[index + 1].nil?
+          start_time = busy[:end]
+          end_time = bedtime(date)
+        else
+          start_time = busy[:end]
+          end_time =  busies[index + 1][:start]
+        end
+
+        if availability_is_within_waking_hours?(
+          {start: start_time, end: end_time},
+          wakeup_time(date),
+          bedtime(date)
+        )
           availibilities_for_day << { start: start_time, end: end_time }
         end
 
-        i += 1
-      end
-      availibilities_for_day << free_time_before_sleep(busy, date) unless free_time_before_sleep(busy, date).nil?
+        unless free_time_before_sleep(busies, date).nil?
+          availibilities_for_day << free_time_before_sleep(busies, date)
+        end
+
+
       availibilities << availibilities_for_day
     end
     availibilities.flatten
   end
 
-
-  # gets the
-  def free_day_availibilities(busys, wake_up_hour, sleep_hour)
-    current_day = DateTime.now
-    free_day_availibilities_array = []
-    if busys.any?
-      free_days_num = (current_day + 4.day).mjd - busys.last[:start].mjd
-      last_busy_day = busys.last[:start]
-    else
-      free_days_num = 5
-
-      last_busy_day = DateTime.now
-
-    end
-
+  def free_day_availibilities(days_of_busies, wake_up_hour, sleep_hour)
+    free_day_availibilities = []
+    date_time = DateTime.now
     i = 1
-    for i in 1..free_days_num
-      wake_up = DateTime.new(last_busy_day.year, last_busy_day.month, last_busy_day.day, wake_up_hour, 0, 0, '-4:00') + i.day
-      _sleep = DateTime.new(last_busy_day.year, last_busy_day.month, last_busy_day.day, sleep_hour, 0, 0, '-4:00') + i.day
-      free_day_availibilities_array << { start: wake_up, end: _sleep  }
-      i += 1
-    end
-    free_day_availibilities_array
-  end
-
-  def free_days_between(busys_seperated, wake_up_hour, sleep_hour)
-    i = 0
-    until busys_seperated[i+1].nil?
-      free_days_between = busys_seperated[i+1].first[:start] - busys_seperated[i].last[:end]
-      if free_days_between >= 1.day
-        n = 1
-        for n in 1.. free_days_between.floor
-          wake_up = DateTime.new(busys_seperated[i].last[:end].year, busys_seperated[i].last[:end].month, busys_seperated[i].last[:end].day, wake_up_hour, 0, 0, '-4:00') + n.day
-          _sleep = DateTime.new(busys_seperated[i].last[:end].year, busys_seperated[i].last[:end].month, busys_seperated[i].last[:end].day, sleep_hour, 0, 0, '-4:00') + n.day
-          free_days_between << { start: wake_up, end: _sleep}
-          n += 1
+    for i in 1..5
+      unless days_of_busies.any? { |busies| busies.first[:start].day == date_time.day }
+        if i == 1
+          free_day_availibilities << { start: DateTime.now, end: bedtime(date_time) }
+        else
+          free_day_availibilities << { start: wakeup_time(date_time), end: bedtime(date_time) }
         end
       end
       i += 1
+      date_time += 1.day
     end
+    free_day_availibilities
   end
 
   # Still need to find a way to integrate user input for wake up and sleep time
@@ -497,7 +481,7 @@ class CalendarsController < ApplicationController
       @availibilities = availibilities(@new_busys_seperated)
 
       # add the availbilities of the days where there are no activities
-      @availibilities += free_day_availibilities(@new_busys, 8, 22)
+      @availibilities += free_day_availibilities(@new_busys_seperated, current_user.wake_up_hour.to_i, current_user.sleep_hour.to_i)
 
       # find the activities that can fit within the time slots of availabilities
       filtered = filtered_by_duration(@availibilities, user_event.duration)
