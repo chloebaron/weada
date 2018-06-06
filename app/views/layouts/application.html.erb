@@ -11,7 +11,10 @@
     <%#= stylesheet_pack_tag 'application', media: 'all' %> <!-- Uncomment if you import CSS in app/javascript/packs/application.js -->
   </head>
   <body>
-    <%= render 'shared/navbar' %>
+    <% if action_name == "home" || action_name == "dashboard" || action_name == "index" %>
+      <%= render 'shared/navbar' %>
+    <% end %>
+  <!--   <%# render 'shared/navbar' %> -->
     <%= render 'shared/flashes' %>
     <%= yield %>
     <%= render('shared/footer') unless @skip_footer %>

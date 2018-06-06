@@ -132,7 +132,6 @@ class CalendarsController < ApplicationController
           availibilities_for_day << free_time_after_wake_up(busies, date)
         end
 
-
       busies.each_with_index do |busy, index|
         if busies[index + 1].nil?
           start_time = busy[:end]
@@ -150,7 +149,6 @@ class CalendarsController < ApplicationController
           availibilities_for_day << { start: start_time, end: end_time }
         end
 
-      end
         unless free_time_before_sleep(busies, date).nil?
           availibilities_for_day << free_time_before_sleep(busies, date)
         end
