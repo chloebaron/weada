@@ -75,7 +75,7 @@ class UserEventsController < CalendarsController
     # Insert event into Weada calendar
     @selected_activities.each { |user_event| insert_weada_event(user_event, ) }
 
-    redirect_to display_weada_calendar_path
+    redirect_to dashboard_path
   end
 
 
@@ -98,7 +98,8 @@ class UserEventsController < CalendarsController
   end
 
   def dashboard
-
+    @time_zone = ActiveSupport::TimeZone.new("Eastern Time (US & Canada)")
+    @schedule_hash.values.map { |user_events| user_events }
   end
 
   # def destroy

@@ -5,8 +5,13 @@
     <% UserEvent.all.each do |event| %>
     <div class="card schedule-card";>
       <div class="event-name"><h4><%= event.activity.description %></h4></div>
-      <div class="event-time">
-      <p><%= event.start_time.strftime("%l%M%p") %> - <%= event.end_time.strftime("%l%M%p") %></p>
+      <div class="event-time"
+      <p><%= event.start_time.in_time_zone(@time_zone).strftime("%l%M%p") %> - <%= event.end_time.in_time_zone(@time_zone).strftime("%l%M%p") %></p>
+      </div>
+      <div>
+        <%= @schedule_hash %>
+        <% raise %>
+
       </div>
     </div>
     <% end %>
