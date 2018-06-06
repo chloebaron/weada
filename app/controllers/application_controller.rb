@@ -14,6 +14,16 @@ class ApplicationController < ActionController::Base
     devise_parameter_sanitizer.permit(:account_update, keys: [:username])
   end
 
+
+
+  def skip_footer
+    @skip_footer = true
+  end
+
+  def default_url_options
+  { host: ENV["HOST"] || "localhost:3000" }
+  end
+
   # before_action :authenticate_user!
 
   # include Pundit
@@ -33,8 +43,4 @@ class ApplicationController < ActionController::Base
   # def skip_pundit?
   #   devise_controller? || params[:controller] =~ /(^(rails_)?admin)|(^pages$)/
   # end
-
-  def skip_footer
-    @skip_footer = true
-  end
 end
