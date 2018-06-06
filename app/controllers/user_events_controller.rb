@@ -2,6 +2,10 @@ class UserEventsController < CalendarsController
   before_action :authenticate_user!, only: [:create]
   before_action :set_event, only: [:edit, :update]
 
+  def following_five_days
+    UserEvent.where(currer)
+  end
+
   def new
     @user_event = UserEvent.new
   end
