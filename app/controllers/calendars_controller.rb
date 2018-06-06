@@ -128,9 +128,9 @@ class CalendarsController < ApplicationController
     days_of_busies.each do |busies|
       date = busies.first[:start]
       availibilities_for_day = []
-        unless free_time_after_wake_up(busies, date).nil?
-          availibilities_for_day << free_time_after_wake_up(busies, date)
-        end
+      unless free_time_after_wake_up(busies, date).nil?
+        availibilities_for_day << free_time_after_wake_up(busies, date)
+      end
 
       busies.each_with_index do |busy, index|
         if busies[index + 1].nil?
@@ -154,7 +154,6 @@ class CalendarsController < ApplicationController
         end
         availibilities << availibilities_for_day
       end
-    end
     end
     availibilities.flatten
   end
@@ -536,4 +535,3 @@ class CalendarsController < ApplicationController
   #   # redirect_to calendars_url
   # end
 end
-

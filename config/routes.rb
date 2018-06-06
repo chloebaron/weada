@@ -5,7 +5,6 @@ Rails.application.routes.draw do
   post '/redirect', to: 'calendars#callback'
   get '/dashboard', to: 'user_events#dashboard', as: 'dashboard'
   get '/generate_calendar', to: 'user_events#generate_calendar', as: 'generate_calendar'
-
   resources :user_events, only: [:new, :create]
   devise_for :users, controllers: { omniauth_callbacks: 'users/omniauth_callbacks', registrations: 'users/registrations' }
   devise_scope :user do
