@@ -1,0 +1,4 @@
+meta_product_name: "Weada"
+meta_title: "Weada - Optimizing your day for the weather"
+meta_description: "You have things to do. The weather changes. We can help."
+meta_image: "cover.png"                       # should exist in `app/assets/images/`
