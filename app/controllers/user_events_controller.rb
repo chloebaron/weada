@@ -99,6 +99,11 @@ class UserEventsController < CalendarsController
 
   def dashboard
     @time_zone = ActiveSupport::TimeZone.new("Eastern Time (US & Canada)")
+
+    # before_action :following_five_days => @schedule_hash
+    @weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    @schedule_hash.values.map { |user_events| user_events }
+    # raise
   end
 
   # def destroy
