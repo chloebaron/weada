@@ -167,38 +167,90 @@ class UserEventsController < CalendarsController
     @new_busys
   end
 
-  def work_start_time(date)
-    DateTime.new(date.year, date.month, date.day, current_user.work_start_time.to_i, 0, 0)
+  def work_start_time(date_time)
+    DateTime.new(date_time.year, date_time.month, date_time.day, current_user.work_start_time.to_i, 0, 0, '-04:00')
   end
 
-  def work_end_time(date)
-    DateTime.new(date.year, date.month, date.day, current_user.work_end_time.to_i, 0, 0)
+  def work_end_time(date_time)
+    DateTime.new(date_time.year, date_time.month, date_time.day, current_user.work_end_time.to_i, 0, 0, '-04:00')
+  end
+
+  def work_schedule(date_time)
+    { start: work_start_time(date_time), end: work_end_time(date_time) }
   end
 
 
-  def new_availabilities_with_work(availabilities)
-    grouped_availabilities =  group_availabilities(availbilities)
-    grouped_availabilities.each do |_availabilities|
-      if week_days?(availabilities.first[:start])
-        _availabilities.reject! { |availability| during_work_hours?(availability) }
-        _availabilities.each do |availability|
-          if end_touch_busy?(availability)
-            availability[:end] = generate_date_time(availability[:end],current_user.work_start_time)
-          elsif head_touch_busy?(availability)
-            availability[:start] = generate_date_time(availability[:start], current_user.work_end_time)
-          elsif across_busy?(availability)
-            _availabilities << { start: availability[:start], end: generate_date_time(availability[:start], current_user.work_start_time)}
-            _availabilities << { start: generate_date_time(availability[:end], current_user.work_end_time), end: availability[:end] }
-            _availabilities.sort_by! { |_availability| _availability[:start] }
+  # def new_availabilities_with_work(availabilities)
+  #   grouped_availabilities =  group_availabilities(availbilities)
+  #   grouped_availabilities.each do |_availabilities|
+  #     if week_days?(availabilities.first[:start])
+  #       _availabilities.reject! { |availability| during_work_hours?(availability) }
+  #       _availabilities.each do |availability|
+  #         if end_touch_busy?(availability)
+  #           availability[:end] = generate_date_time(availability[:end],current_user.work_start_time)
+  #         elsif head_touch_busy?(availability)
+  #           availability[:start] = generate_date_time(availability[:start], current_user.work_end_time)
+  #         elsif across_busy?(availability)
+  #           _availabilities.delete(availability)
+  #           _availabilities << { start: availability[:start], end: generate_date_time(availability[:start], current_user.work_start_time)}
+  #           _availabilities << { start: generate_date_time(availability[:end], current_user.work_end_time), end: availability[:end] }
+  #           _availabilities.sort_by! { |_availability| _availability[:start] }
+  #         end
+  #       end
+  #     end
+  #   end
+  #   group_availabilities.flatten.sort_by! { |_availability| _availability[:start] }
+  # end
+
+  def merge_busy_with_work_schedule(days_of_busies)
+    days_of_busies.each do |busies|
+      busies_for_delete = []
+      if week_days?(busies.first[:start])
+        _work_schedule = work_schedule(busies.first[:start])
+        busies.reject! { |busy| during_work_hours?(busy) }
+          if !busies.empty?
+            busies.each do |busy|
+              if end_touch_busy?(busy)
+                _work_schedule[:start] = busy[:start]
+                busies_for_delete << busy
+              elsif head_touch_busy?(busy)
+                _work_schedule[:end] = busy[:end]
+                busies_for_delete << busy
+              end
+            end
+            busies << _work_schedule
+            busies_for_delete.each { |busy| busies.delete(busy) }
+          else
+            busies << _work_schedule
           end
-        end
       end
+      busies.sort_by! { |busy| busy[:start] }
     end
-    group_availabilities.flatten.sort_by! { |_availability| _availability[:start] }
+    days_of_busies
   end
+
+  def add_work_schedule_to_free_week_day(days_of_busies)
+    date_time = DateTime.now
+    i = 1
+    for i in 1..5
+      unless days_of_busies.any? { |busies| busies.first[:start].day == date_time.day }
+          if week_days?(date_time)
+            if i == 1
+              days_of_busies << [{ start: date_time, end: work_end_time(date_time) }]
+            else
+              days_of_busies << [work_schedule(date_time)]
+            end
+          end
+      end
+      i += 1
+      date_time += 1.day
+    end
+    days_of_busies.sort_by! { |busies| busies.first[:start] }
+  end
+
 
   def during_work_hours?(availability)
-    availability[:start].hour >= current_user.work_start_tim.to_i && availability[:end].hour <= current_user.work_end_time.to_i
+    availability[:start].hour >= current_user.work_start_time.to_i && availability[:end].hour <= current_user.work_end_time.to_i
   end
 
   def end_touch_busy?(availability)
@@ -206,7 +258,7 @@ class UserEventsController < CalendarsController
   end
 
   def head_touch_busy?(availability)
-    availability[:start].hour >= current_user.work_start_tim.to_i && availability[:end].hour > current_user.work_end_time.to_i
+    availability[:start].hour >= current_user.work_start_time.to_i && availability[:end].hour > current_user.work_end_time.to_i
   end
 
   def across_busy?(availability)
@@ -221,6 +273,8 @@ class UserEventsController < CalendarsController
     new_busys.sort_by!{ |busy| busy[:start] }
     # group activities by date
     new_busys_seperated = seperate_busys_by_date(new_busys)
+    new_busys_seperated = add_work_schedule_to_free_week_day(new_busys_seperated)
+    new_busys_seperated = merge_busy_with_work_schedule(new_busys_seperated)
     # get availabilities for the week
     @availabilities = availabilities(new_busys_seperated)
 
@@ -231,7 +285,6 @@ class UserEventsController < CalendarsController
   def find_optimal_availabilities(availabilities, user_event)
     # find the activities that can fit within the time slots of availabilities
     @filtered = filtered_by_duration(availabilities, user_event.duration)
-    @filtered
   end
 
   def get_chosen_activities
