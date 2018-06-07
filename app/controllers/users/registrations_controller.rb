@@ -7,18 +7,25 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   end
 
-  protected
-
-  def after_sign_up_path_for(resource)
-    user_google_oauth2_omniauth_authorize_path # Or :prefix_to_your_route
-    redirect_to activities_path
-  end
 
   # GET /resource/sign_up
-  # def new
-  #   super
-  # end
+  def new
+    session[:user_sleep_schedule] = {
+      "wake_up_hour"=>params[:wake_up_hour],
+      "sleep_hour"=>params[:sleep_hour],
+      "start_time"=>params[:start_time],
+      "end_time"=>params[:end_time]
+    }
+    super
+  end
 
+  # protected
+
+  # def after_sign_up_path_for(resource)
+  #   raise
+  #   user_google_oauth2_omniauth_authorize_path # Or :prefix_to_your_route
+  #   redirect_to activities_path
+  # end
   # POST /resource
   # def create
   #   super
