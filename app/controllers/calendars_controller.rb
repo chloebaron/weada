@@ -73,7 +73,7 @@ class CalendarsController < ApplicationController
     weada_calendar = list_calendars().find{ |e| e.summary == "Weada" }
 
     event = Google::Apis::CalendarV3::Event.new(
-      summary: "#{user_weada_event.activity.name} for #{user_weada_event.duration} minutes",
+      summary: "#{user_weada_event.activity.description}",
       start: {
         date_time: "#{user_weada_event.start_time.to_datetime}",
         time_zone: 'America/Toronto',

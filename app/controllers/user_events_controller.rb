@@ -17,7 +17,6 @@ class UserEventsController < CalendarsController
       end
     end
 
-
     redirect_to generate_calendar_path
   end
 
