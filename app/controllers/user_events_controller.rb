@@ -12,7 +12,6 @@ class UserEventsController < CalendarsController
     UserEvent.where(status: 0).destroy_all
     params[:user_events].keys.each do |activity_id|
       activity = Activity.find(activity_id.to_i)
-
       if params[:user_events][activity_id] != ""
         UserEvent.create!(user: current_user, activity: activity, status: 0, duration: params[:user_events][activity_id].to_i)
       end
@@ -185,11 +184,15 @@ class UserEventsController < CalendarsController
   end
 
   def work_start_time(date_time)
-    DateTime.new(date_time.year, date_time.month, date_time.day, current_user.work_start_time.to_i, 0, 0, '-04:00')
+    user_time = current_user.work_start_time.to_datetime
+    minutes = user_time.minute.to_s.split("").map { |number| number.to_i }
+    DateTime.new(date_time.year, date_time.month, date_time.day, user_time.hour, minutes[0], 0, '-04:00')
   end
 
   def work_end_time(date_time)
-    DateTime.new(date_time.year, date_time.month, date_time.day, current_user.work_end_time.to_i, 0, 0, '-04:00')
+    user_time = current_user.work_end_time.to_datetime
+    minutes = user_time.minute.to_s.split("").map { |number| number.to_i }
+    DateTime.new(date_time.year, date_time.month, date_time.day, user_time.hour, minutes[0], 0, '-04:00')
   end
 
   def work_schedule(date_time)
@@ -202,21 +205,21 @@ class UserEventsController < CalendarsController
       if week_days?(busies.first[:start])
         _work_schedule = work_schedule(busies.first[:start])
         busies.reject! { |busy| during_work_hours?(busy) }
-          if !busies.empty?
-            busies.each do |busy|
-              if end_touch_busy?(busy)
-                _work_schedule[:start] = busy[:start]
-                busies_for_delete << busy
-              elsif head_touch_busy?(busy)
-                _work_schedule[:end] = busy[:end]
-                busies_for_delete << busy
-              end
+        if !busies.empty?
+          busies.each do |busy|
+            if end_touch_busy?(busy)
+              _work_schedule[:start] = busy[:start]
+              busies_for_delete << busy
+            elsif head_touch_busy?(busy)
+              _work_schedule[:end] = busy[:end]
+              busies_for_delete << busy
             end
-            busies << _work_schedule
-            busies_for_delete.each { |busy| busies.delete(busy) }
-          else
-            busies << _work_schedule
           end
+          busies << _work_schedule
+          busies_for_delete.each { |busy| busies.delete(busy) }
+        else
+          busies << _work_schedule
+        end
       end
       busies.sort_by! { |busy| busy[:start] }
     end
@@ -228,13 +231,13 @@ class UserEventsController < CalendarsController
     i = 1
     for i in 1..5
       unless days_of_busies.any? { |busies| busies.first[:start].day == date_time.day }
-          if week_days?(date_time)
-            if i == 1
-              days_of_busies << [{ start: date_time, end: work_end_time(date_time) }]
-            else
-              days_of_busies << [work_schedule(date_time)]
-            end
+        if week_days?(date_time)
+          if i == 1
+            days_of_busies << [{ start: date_time, end: work_end_time(date_time) }]
+          else
+            days_of_busies << [work_schedule(date_time)]
           end
+        end
       end
       i += 1
       date_time += 1.day
@@ -287,7 +290,7 @@ class UserEventsController < CalendarsController
     # @selected_activities = [UserEvent.create(user: current_user, activity: Activity.first, duration: 60)]
     @selected_activities.each do |user_event|
       user_event.update duration: user_event.duration + 30
-    endx
+    end
   end
 
   def find_best_times_for_chosen_activities(selected_activities, new_busys, availabilities)
@@ -309,7 +312,7 @@ class UserEventsController < CalendarsController
         @all_possibilities_insert_event = combine_possibilities(@interval_slot_possiblilities, @duration_slot_possiblilities)
 
         if @all_possibilities_insert_event.empty?
-          time_slot = recommend_longest_suitable_time_slot_from_all_availabilities(availabilities, user_event.activity)  unless recommend_longest_suitable_time_slot_from_all_availabilities(@availabilities, user_event.activity).nil?
+          time_slot = recommend_longest_suitable_time_slot_from_all_availabilities(availabilities, user_event.activity) unless recommend_longest_suitable_time_slot_from_all_availabilities(@availabilities, user_event.activity).nil?
           user_event.update(duration: calculate_time(time_slot) - 30)
           user_event.update(start_time: time_slot[:start] + 15.minutes, end_time: time_slot[:end], status: 1)
         else
