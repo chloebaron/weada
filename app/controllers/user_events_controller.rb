@@ -157,7 +157,7 @@ class UserEventsController < CalendarsController
     weather_url = "https://api.darksky.net/forecast/#{ENV["DARKSKY_API_LEO"]}/45.516136,-73.656830?extend=hourly&exclude=daily,minutely"
     weather_json = open(weather_url).read
     weather = JSON.parse(weather_json)
-    next_120_hours = weather["hourly"]["data"].slice(0..119)
+    next_120_hours = weather["hourly"]["data"].slice(0..144)
 
     next_120_hours.each do |weather_condition|
       HourlyWeather.create!(

@@ -21,6 +21,8 @@
 }
 
 .btn-save {
+  background: rgba(255,255,255, 0.4);
+  transition: all 0.25s ease-in-out;
   padding: 15px;
   box-shadow: none;
   width: 30%;
@@ -35,8 +37,9 @@
     color: white;
   }
   &:hover {
-     background: rgba(255,255,255, 0.4);
-     transition: all 0.25s ease-in-out;
+    background: rgba(255,255,255, 0);
+    transition: all 0.25s ease-in-out;
+    font-weight: bold;
   }
 }
 
@@ -53,7 +56,7 @@
   h4 {
     color: white;
     font-weight: 400;
-    font-size: 16px;
+    font-size: 18px;
   }
 }
 

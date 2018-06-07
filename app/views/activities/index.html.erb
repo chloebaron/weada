@@ -1,6 +1,6 @@
 <div class="activities-wrapper wrapper">
   <div class="card-container">
-      <h2>Choose your activities for the week!</h2>
+      <h3>1. Choose your activities for the week!</h3>
       <div class="row">
         <% @activities.each do |activity| %>
         <div class="col-xs-12 col-sm-6 col-md-4">
@@ -24,7 +24,7 @@
   <div id="sidebar">
     <%= form_tag('/user_events', {:method => :post, :class => 'form-design' }) do %>
       <div class="selected-activities-container">
-        <h4>Choose a duration for each activity</h4>
+        <h4>2. Choose a duration for each activity</h4>
         <% @activities.each do |activity| %>
             <div class="card hidden activity-wrapper-<%= activity.id %>"
               <input type="checkbox" name="activity_ids[]" id="<%= activity.id %>" value="<%= activity.id %>" class="hidden">
