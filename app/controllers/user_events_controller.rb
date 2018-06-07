@@ -22,6 +22,7 @@ class UserEventsController < CalendarsController
     redirect_to generate_calendar_path
   end
 
+
   # METHODS USED ARE PRIVATE #
   def generate_calendar
     require 'google/apis/calendar_v3'
@@ -120,7 +121,7 @@ class UserEventsController < CalendarsController
 
   private
 
-  def following_five_days
+  def following_five_days # => for displaying events
     five_days_user_events = UserEvent.where("user_id = ? AND start_time >= ? AND start_time <= ?",
       current_user.id,
       DateTime.now,
@@ -149,7 +150,6 @@ class UserEventsController < CalendarsController
 
 
   # METHODS USED (IN ORDER) FOR THE 'generate_calendar' METHOD #
-
   def get_hourly_forecasts
     HourlyWeather.destroy_all
 
@@ -287,7 +287,7 @@ class UserEventsController < CalendarsController
     # @selected_activities = [UserEvent.create(user: current_user, activity: Activity.first, duration: 60)]
     @selected_activities.each do |user_event|
       user_event.update duration: user_event.duration + 30
-    end
+    endx
   end
 
   def find_best_times_for_chosen_activities(selected_activities, new_busys, availabilities)
