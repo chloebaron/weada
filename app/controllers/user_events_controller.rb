@@ -18,7 +18,6 @@ class UserEventsController < CalendarsController
       end
     end
 
-
     redirect_to generate_calendar_path
   end
 
@@ -287,7 +286,7 @@ class UserEventsController < CalendarsController
     # @selected_activities = [UserEvent.create(user: current_user, activity: Activity.first, duration: 60)]
     @selected_activities.each do |user_event|
       user_event.update duration: user_event.duration + 30
-    endx
+    end
   end
 
   def find_best_times_for_chosen_activities(selected_activities, new_busys, availabilities)
