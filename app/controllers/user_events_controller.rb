@@ -179,29 +179,6 @@ class UserEventsController < CalendarsController
     { start: work_start_time(date_time), end: work_end_time(date_time) }
   end
 
-
-  # def new_availabilities_with_work(availabilities)
-  #   grouped_availabilities =  group_availabilities(availbilities)
-  #   grouped_availabilities.each do |_availabilities|
-  #     if week_days?(availabilities.first[:start])
-  #       _availabilities.reject! { |availability| during_work_hours?(availability) }
-  #       _availabilities.each do |availability|
-  #         if end_touch_busy?(availability)
-  #           availability[:end] = generate_date_time(availability[:end],current_user.work_start_time)
-  #         elsif head_touch_busy?(availability)
-  #           availability[:start] = generate_date_time(availability[:start], current_user.work_end_time)
-  #         elsif across_busy?(availability)
-  #           _availabilities.delete(availability)
-  #           _availabilities << { start: availability[:start], end: generate_date_time(availability[:start], current_user.work_start_time)}
-  #           _availabilities << { start: generate_date_time(availability[:end], current_user.work_end_time), end: availability[:end] }
-  #           _availabilities.sort_by! { |_availability| _availability[:start] }
-  #         end
-  #       end
-  #     end
-  #   end
-  #   group_availabilities.flatten.sort_by! { |_availability| _availability[:start] }
-  # end
-
   def merge_busy_with_work_schedule(days_of_busies)
     days_of_busies.each do |busies|
       busies_for_delete = []
