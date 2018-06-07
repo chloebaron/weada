@@ -39,11 +39,12 @@
 .navbar-wagon-item {
   cursor: pointer;
   padding: 0 20px;
+  color: $weada-green;
 }
 
 /* Navbar link */
 .navbar-wagon-link {
-  color: #616668;
+  color: $weada-green;
   font-size: 14px;
 }
 .navbar-wagon-link:hover {
@@ -67,10 +68,11 @@
 }
 .navbar-wagon-dropdown-menu li > a:hover {
   background: transparent !important;
-  color: black !important;
+  color: $weada-green !important;
 }
 .navbar-wagon-dropdown-menu:before {
   content: ' ';
+  color: $weada-green;
   height: 10px;
   width: 10px;
   position: absolute;
