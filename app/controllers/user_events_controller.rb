@@ -101,6 +101,7 @@ class UserEventsController < CalendarsController
 
     # before_action :following_five_days => @schedule_hash
     @weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    @today = @weekdays[DateTime.now.wday - 1]
     @schedule_hash.values.map { |user_events| user_events }
 
     @icons = {
@@ -115,6 +116,7 @@ class UserEventsController < CalendarsController
       gallery: "paint-brush",
       cafe: "coffee"
     }
+    # raise
   end
 
   private
@@ -135,6 +137,7 @@ class UserEventsController < CalendarsController
       i += 1
     end
     @schedule_hash
+    # raise
   end
 
   def event_params

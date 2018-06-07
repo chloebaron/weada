@@ -10,7 +10,7 @@
   </div>
 
   <div class="row dashboard-events">
-    <% @weekdays.each do |weekday| %>
+    <% @schedule_hash.keys.each do |weekday| %>
     <!-- Outer div of column. Need to put title here OR just above -->
       <div class="col-xs-3 col-md-3 weekday-col">
         <!-- Outer div of content -->
@@ -20,8 +20,12 @@
           </div>
           <!-- column content -->
           <div class="column-day">
-            <p><%= weekday %></p>
-            <% if @schedule_hash[weekday] != "" && !@schedule_hash[weekday].nil?%>
+            <% if @today == weekday %>
+              <p class="weada-green"><%= weekday %></p>
+            <% else %>
+              <p><%= weekday %></p>
+            <% end %>
+            <% if @schedule_hash[weekday] != "" %>
               <% @schedule_hash[weekday].each do |event| %>
                 <div class="card schedule-card <%= event.activity.name %>-bd-color";>
                   <!-- input card icon, activity-color, and weather icon if time -->
@@ -47,6 +51,7 @@
     <% end %>
   </div>
 </div>
+
 
 
 
