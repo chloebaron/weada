@@ -115,11 +115,15 @@ class CalendarsController < ApplicationController
   end
 
   def wakeup_time(date)
-    DateTime.new(date.year, date.month, date.day, current_user.wake_up_hour.to_i, 0, 0, '-04:00')
+    user_time = current_user.wake_up_hour.to_datetime
+    minutes = user_time.minute.to_s.split("").map { |number| number.to_i }
+    DateTime.new(date.year, date.month, date.day, user_time.hour, minutes[0], 0, '-04:00')
   end
 
   def bedtime(date)
-    DateTime.new(date.year, date.month, date.day, current_user.sleep_hour.to_i, 0, 0, '-04:00')
+    user_time = current_user.sleep_hour.to_datetime
+    minutes = user_time.minute.to_s.split("").map { |number| number.to_i }
+    DateTime.new(date.year, date.month, date.day, user_time.hour, minutes[0], 0, '-04:00')
   end
 
   def availabilities(days_of_busies) # => array of the times you are available in order of day
