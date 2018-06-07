@@ -1,12 +1,39 @@
-.container.dashboard {
-  height: calc(100vh - 140px);
+.upcoming-events {
+  height: 100vh;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  border-top: 3px solid $weada-green;
+  padding-top: 10px;
 }
 
-.btn.btn-create-schedule {
+#user-greeting {
   position: absolute;
-  top: 50px;
-  right: 20px;
+  top: 10px;
+  left: 20px;
+  margin: 20px 0;
+}
+
+.dashboard-events {
+  margin-top: 20px;
+  display: flex;
+}
+
+.weekday-col  {
+  display: flex;
+  align-items: flex-start;
+  height: 60%;
+  p {
+  font-weight: bold;
+  font-size: 14px;
+  }
+}
+
+.column-spacer {
+  width: 20px;
+  border-left: 2px solid rgba(150,150,150,0.5);
+  height: 100%;
+  left: 0;
 }
 
 .schedule-card {
@@ -23,5 +50,20 @@
   }
   p {
     font-size: 14px;
+    margin: auto;
+  }
+}
+
+.btn.btn-create-schedule {
+  width: 200px;
+  padding: 10px;
+  margin: 20px 0;
+  background-color: $weada-green;
+  a {
+    color: white;
+    text-decoration: none;
+  }
+  &:hover {
+    opacity: 0.7;
   }
 }
