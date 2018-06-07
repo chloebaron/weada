@@ -1,11 +1,12 @@
 .upcoming-events {
-  height: 100%;
+  min-height: calc(100vh - 140px);
   position: relative;
   display: flex;
   flex-direction: column;
   border-top: 3px solid $weada-green;
   padding-top: 10px;
 }
+
 
 #user-greeting {
   position: absolute;
@@ -15,8 +16,8 @@
 }
 
 .dashboard-events {
-  margin-top: 20px;
   display: flex;
+  padding: 20px;
 }
 
 .weekday-col  {
@@ -44,17 +45,18 @@
   height: 125px;
   border-left: 5px solid;
   box-shadow: 1px 1px 3px rgba(100,100,100,0.5);
-
   h4 {
     font-size: 14px;
     font-weight: 500;
     margin: 0;
+    margin-top: 30px;
   }
   p {
     font-size: 12px;
     margin: auto;
     font-weight: lighter;
     margin: 0;
+    padding-bottom: 10px
   }
 }
 

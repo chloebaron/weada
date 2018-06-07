@@ -21,8 +21,10 @@
     <%= stylesheet_pack_tag 'application', media: 'all' %> <!-- Uncomment if you import CSS in app/javascript/packs/application.js -->
   </head>
   <body>
-    <% if action_name == "home" || action_name == "dashboard" || action_name == "index" || action_name == "display_weada_calendar" %>
+    <% if action_name == "dashboard" || action_name == "index" || action_name == "display_weada_calendar" %>
       <%= render 'shared/navbar' %>
+    <% elsif action_name == "home" %>
+      <%= render 'shared/navbar_home' %>
     <% end %>
   <!--   <%# render 'shared/navbar' %> -->
     <%= render 'shared/flashes' %>
