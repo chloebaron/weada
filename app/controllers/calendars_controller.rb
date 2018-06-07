@@ -198,23 +198,6 @@ class CalendarsController < ApplicationController
     { start: start, end: _end }
   end
 
-  # def availability_work_day_no_event
-  #   current_time = DateTime.now
-  #   availability_work_day = []
-  #   if current_time.hour <= current_user.wake_up_hour.to_i
-  #     availability_work_day << between_wake_up_and_work_start(current_time)
-  #     availability_work_day << between_work_end_and_sleep(current_time)
-  #   elsif current_time.hour > current_user.wake_up_hour.to_i && current_time.hour < current_user.work_start_time.to_i
-  #     availability_work_day << { start: current_time, end: generate_date_time(current_time, current_user.work_start_time) }
-  #     availability_work_day << between_work_end_and_sleep(current_time)
-  #   elsif current_time.hour >= current_user.work_start_time.to_i && current_time.hour < current_user.work_end_time.to_i
-  #     availability_work_day << between_work_end_and_sleep(current_time)
-  #   elsif current_time.hour >= current_user.work_end_time.to_i && current_time.hour < current_user.sleep_hour.to_i
-  #     availability_work_day << { start: current_time, end: bedtime }
-  #   end
-  #   availability_work_day
-  # end
-
   def have_jobs?
     !current_user.work_start_time.nil?
   end
