@@ -73,7 +73,7 @@ class CalendarsController < ApplicationController
     weada_calendar = list_calendars().find{ |e| e.summary == "Weada" }
 
     event = Google::Apis::CalendarV3::Event.new(
-      summary: "#{user_weada_event.activity.name} for #{user_weada_event.duration} minutes",
+      summary: "#{user_weada_event.activity.description}",
       start: {
         date_time: "#{user_weada_event.start_time.to_datetime}",
         time_zone: 'America/Toronto',
@@ -193,23 +193,6 @@ class CalendarsController < ApplicationController
     _end = DateTime.new(date_time.year, date_time.month, date_time.day, current_user.sleep_hour.to_i, 0, 0, '-04:00')
     { start: start, end: _end }
   end
-
-  # def availability_work_day_no_event
-  #   current_time = DateTime.now
-  #   availability_work_day = []
-  #   if current_time.hour <= current_user.wake_up_hour.to_i
-  #     availability_work_day << between_wake_up_and_work_start(current_time)
-  #     availability_work_day << between_work_end_and_sleep(current_time)
-  #   elsif current_time.hour > current_user.wake_up_hour.to_i && current_time.hour < current_user.work_start_time.to_i
-  #     availability_work_day << { start: current_time, end: generate_date_time(current_time, current_user.work_start_time) }
-  #     availability_work_day << between_work_end_and_sleep(current_time)
-  #   elsif current_time.hour >= current_user.work_start_time.to_i && current_time.hour < current_user.work_end_time.to_i
-  #     availability_work_day << between_work_end_and_sleep(current_time)
-  #   elsif current_time.hour >= current_user.work_end_time.to_i && current_time.hour < current_user.sleep_hour.to_i
-  #     availability_work_day << { start: current_time, end: bedtime }
-  #   end
-  #   availability_work_day
-  # end
 
   def have_jobs?
     !current_user.work_start_time.nil?
