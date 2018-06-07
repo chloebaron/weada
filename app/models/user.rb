@@ -9,19 +9,27 @@ class User < ApplicationRecord
   has_many :activities, through: :user_events
 
 
-  def self.from_omniauth(auth)
+  def self.from_omniauth(auth, sleep_schedule)
     data = auth.info
     user = User.where(email: data['email']).first
-
     # Uncomment the section below if you want users to be created if they don't exist
-    if user.nil?
-      user = User.create(
+    if user.nil? && sleep_schedule
+      User.create!(
         email: data['email'],
+        first_name: data['first_name'],
+        last_name: data['last_name'],
+        wake_up_hour: sleep_schedule["wake_up_hour"],
+        sleep_hour: sleep_schedule["sleep_hour"],
+        work_start_time: sleep_schedule["start_time"],
+        work_end_time: sleep_schedule["end_time"],
         password: Devise.friendly_token[0,20],
         refresh_token: auth.credentials.refresh_token
       )
-    else
+      # raise
+    elsif user
       user.update(refresh_token: auth.credentials.refresh_token)
+    else
+      nil
     end
 
     user

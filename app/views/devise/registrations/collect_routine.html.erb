@@ -8,20 +8,20 @@
       <%= form_tag(new_user_registration_path, method: "get") do %>
           <div class="time-field-group form-group">
             <%= label_tag(:wake_up_hour, "Wake Up Time") %>
-            <%= select_tag(:wake_up_hour, options_for_select((0..23).to_a), class: 'form-control routine')%>
+            <%= text_field_tag(:wake_up_hour, "", class: 'form-control routine', id: "wake_up_hour")%>
           </div>
           <div class="time-field-group form-group">
             <%= label_tag(:sleep_hour, "Sleep Time") %>
-            <%= select_tag(:sleep_hour, options_for_select((0..23).to_a), class: 'form-control routine')%>
+            <%= text_field_tag(:sleep_hour, "", class: 'form-control routine', id: "sleep_hour")%>
           </div>
         <h3>If you work Monday-Friday, tell us your work hours.</h3>
           <div class="time-field-group form-group">
             <%= label_tag(:start_time, "Start Time") %>
-            <%= select_tag(:start_time, options_for_select((0..23).to_a), class: 'form-control routine')%>
+            <%= text_field_tag(:start_time, "", class: 'form-control routine', id: "start_time")%>
           </div>
           <div class="time-field-group form-group">
             <%= label_tag(:end_time, "End Time") %>
-            <%= select_tag(:end_time, options_for_select((0..23).to_a), class: 'form-control routine')%>
+            <%= text_field_tag(:end_time, "", class: 'form-control routine', id: "end_time")%>
           </div>
           <div class="text-center">
             <%= submit_tag("Next", class: "btn btn-primary btn-md") %>

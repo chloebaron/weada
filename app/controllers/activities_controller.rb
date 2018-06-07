@@ -3,9 +3,9 @@ class ActivitiesController < ApplicationController
   before_action :skip_footer, only: [:index]
 
   def index
+    session.delete(:user_sleep_schedule)
     @activities = Activity.all
     @events = UserEvent.all.where(user: current_user, status: 0)
-
     @icons = {
       run: "heartbeat",
       park: "leaf",
