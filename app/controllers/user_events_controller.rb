@@ -176,26 +176,41 @@ class UserEventsController < CalendarsController
   end
 
 
-  # def new_availabilities_with_work(availabilities)
-  #   grouped_availabilities =  group_availabilities(availbilities)
-  #   grouped_availabilities.each do |availability|
-  #     if week_days?(availability.first[:start])
-  #       availability.reject! { |a| during_work_hours?(a) }
-  #       availability.each do |a|
-  #         if end_touch_busy?
-
-  #         end
-  #       end
-  #     end
-  #   end
-  # end
+  def new_availabilities_with_work(availabilities)
+    grouped_availabilities =  group_availabilities(availbilities)
+    grouped_availabilities.each do |_availabilities|
+      if week_days?(availabilities.first[:start])
+        _availabilities.reject! { |availability| during_work_hours?(availability) }
+        _availabilities.each do |availability|
+          if end_touch_busy?(availability)
+            availability[:end] = generate_date_time(availability[:end],current_user.work_start_time)
+          elsif head_touch_busy?(availability)
+            availability[:start] = generate_date_time(availability[:start], current_user.work_end_time)
+          elsif across_busy?(availability)
+            _availabilities << { start: availability[:start], end: generate_date_time(availability[:start], current_user.work_start_time)}
+            _availabilities << { start: generate_date_time(availability[:end], current_user.work_end_time), end: availability[:end] }
+            _availabilities.sort_by! { |_availability| _availability[:start] }
+          end
+        end
+      end
+    end
+    group_availabilities.flatten.sort_by! { |_availability| _availability[:start] }
+  end
 
   def during_work_hours?(availability)
-    availability[:start] >= current_user.work_start_time && availability[:end] <= current_user.work_end_time
+    availability[:start].hour >= current_user.work_start_tim.to_i && availability[:end].hour <= current_user.work_end_time.to_i
   end
 
   def end_touch_busy?(availability)
-    availability[:start] < current_user.work_start_time && availability[:end] <= current_user.work_end_time
+    availability[:start].hour < current_user.work_start_time.to_i&& availability[:end].hour <= current_user.work_end_time.to_i
+  end
+
+  def head_touch_busy?(availability)
+    availability[:start].hour >= current_user.work_start_tim.to_i && availability[:end].hour > current_user.work_end_time.to_i
+  end
+
+  def across_busy?(availability)
+    availability[:start].hour < current_user.work_start_time.to_i&& availability[:end].hour > current_user.work_end_time.to_i
   end
 
   def group_availabilities(availabilities)
@@ -231,8 +246,8 @@ class UserEventsController < CalendarsController
   def find_best_times_for_chosen_activities(selected_activities, new_busys, availabilities)
     selected_activities.each do |user_event|
       availabilities = get_availabilities(new_busys)
+
       find_optimal_availabilities(availabilities, user_event)
-      #byebug # => @filtered
       if @filtered.empty?
         time_slot = recommend_longest_suitable_time_slot_from_all_availabilities(availabilities, user_event.activity)
 

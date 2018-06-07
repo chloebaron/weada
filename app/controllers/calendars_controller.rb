@@ -196,27 +196,35 @@ class CalendarsController < ApplicationController
     free_day_availabilities
   end
 
-  def between_wake_up_and_work_start
-    { start: current_user.wake_up_hour, end: current_user.work_start_time }
+  def generate_date_time(current_time, hour)
+    DateTime.new(current_time.year, current_time.month, current_time.day, hour.to_i, 0, 0)
   end
 
-  def between_work_end_and_sleep
-    { start: current_user.work_end_time, end: current_user.sleep_hour }
+  def between_wake_up_and_work_start(date_time)
+    start = DateTime.new(date_time.year, date_time.month, date_time.day, current_user.wake_up_hour.to_i, 0, 0)
+    _end = DateTime.new(date_time.year, date_time.month, date_time.day, current_user.work_start_time.to_i, 0, 0)
+    { start: start, end: _end }
+  end
+
+  def between_work_end_and_sleep(date_time)
+    start = DateTime.new(date_time.year, date_time.month, date_time.day, current_user.work_end_time.to_i, 0, 0)
+    _end = DateTime.new(date_time.year, date_time.month, date_time.day, current_user.sleep_hour.to_i, 0, 0)
+    { start: start, end: _end }
   end
 
   def availability_work_day_no_event
     current_time = DateTime.now
     availability_work_day = []
-    if current_time <= current_user.wake_up_hour
-      availability_work_day << between_wake_up_and_work_start
-      availability_work_day << between_work_end_and_sleep
-    elsif current_time > current_user.wake_up_hour && current_time < current_user.work_start_time
-      availability_work_day << { start: current_time, end: work_start_time }
-      availability_work_day << between_work_end_and_sleep
-    elsif current_time >= current_user.work_start_time && current_time < current_user.work_end_time
-      availability_work_day << between_work_end_and_sleep
-    elsif current_time >= current_user.work_end_time && current_time < current_user.sleep_hour
-      availability_work_day << { start: current_time, end: current_user.sleep_hour }
+    if current_time.hour <= current_user.wake_up_hour.to_i
+      availability_work_day << between_wake_up_and_work_start(current_time)
+      availability_work_day << between_work_end_and_sleep(current_time)
+    elsif current_time.hour > current_user.wake_up_hour.to_i && current_time.hour < current_user.work_start_time.to_i
+      availability_work_day << { start: current_time, end: generate_date_time(current_time, current_user.work_start_time) }
+      availability_work_day << between_work_end_and_sleep(current_time)
+    elsif current_time.hour >= current_user.work_start_time.to_i && current_time.hour < current_user.work_end_time.to_i
+      availability_work_day << between_work_end_and_sleep(current_time)
+    elsif current_time.hour >= current_user.work_end_time.to_i && current_time.hour < current_user.sleep_hour.to_i
+      availability_work_day << { start: current_time, end: bedtime }
     end
     availability_work_day
   end
