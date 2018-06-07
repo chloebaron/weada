@@ -1,12 +1,13 @@
+
 <div class="container upcoming-events">
   <div class="user-greeting">
-    <h4>Hello, <%= current_user.first_name %></h4>
+    <h2>Hello, <%= current_user.first_name %></h2>
   </div>
   <div class="btn btn-create-schedule">
     <%= link_to "Create Schedule", activities_path %>
   </div>
   <div class="events-title">
-      <h4>Upcoming Events</h4>
+      <h3>Upcoming Events</h3>
   </div>
 
   <div class="row dashboard-events">
@@ -22,16 +23,21 @@
           <div class="column-day">
             <p><%= weekday %></p>
             <% if @schedule_hash[weekday] != "" && !@schedule_hash[weekday].nil?%>
-              <% @schedule_hash[weekday].each do |activity| %>
-                <div class="card schedule-card";>
+              <% @schedule_hash[weekday].each do |event| %>
+                <div class="card schedule-card <%= event.activity.name %>-bd-color";>
                   <!-- input card icon, activity-color, and weather icon if time -->
-                  <div class="event-name">
-                    <p><%= activity.activity.description %></p>
+                  <div class="dashboard-icon">
+                    <i class="fa fa-<%= @icons[event.activity.name.to_sym] %> <%= event.activity.name %>-color  fa-lg"></i>
                   </div>
-                  <div class="event-time">
-                    <p>
-                      <%= activity.start_time.in_time_zone(@time_zone).strftime("%l %M%p") %> - <%= activity.end_time.in_time_zone(@time_zone).strftime("%l %M%p") %>
-                    </p>
+                  <div>
+                    <div class="event-name">
+                      <h4><%= event.activity.description %></h4>
+                    </div>
+                    <div class="event-time">
+                      <p>
+                        <%= event.start_time.in_time_zone(@time_zone).strftime("%l %M%p") %> - <%= event.end_time.in_time_zone(@time_zone).strftime("%l %M%p") %>
+                      </p>
+                    </div>
                   </div>
                 </div>
               <% end %>

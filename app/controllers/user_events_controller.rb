@@ -50,9 +50,9 @@ class UserEventsController < CalendarsController
 
     free_busy_weada = get_free_busy(@weada_calendar.id) # => free busy object
 
+    @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
 
     # busy items from primary
-    @busys = free_busy.calendars["primary"].busy.map { |busy| { start: busy.start, end: busy.end } }
 
     # busy items from Weada calendar, if it exists
     @busys_weada = free_busy_weada.calendars[@weada_calendar.id].busy.map { |busy| { start: busy.start, end: busy.end } }
@@ -63,14 +63,14 @@ class UserEventsController < CalendarsController
 
     combine_weada_and_primary_buys(@busys, @busys_weada) # => @new_busys
 
-    get_availibilities(@new_busys) # => @availabilities
+    get_availabilities(@new_busys) # => @availabilities
 
     # order by user preference
     # @selected_activities = UserEvent.joins(:activity).where(status: 0).order("activities.preference desc")
 
     get_chosen_activities # => @selected_activities
 
-    find_best_times_for_chosen_activities(@selected_activities, @new_busys, @availibilities)
+    find_best_times_for_chosen_activities(@selected_activities, @new_busys, @availabilities)
     # raise
 
     # Insert event into Weada calendar
@@ -104,11 +104,20 @@ class UserEventsController < CalendarsController
     # before_action :following_five_days => @schedule_hash
     @weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     @schedule_hash.values.map { |user_events| user_events }
-    # raise
-  end
 
-  # def destroy
-  # end
+    @icons = {
+      run: "heartbeat",
+      park: "leaf",
+      museum: "university",
+      bbq: "fire",
+      yoga: "align-center",
+      cinema: "film",
+      drinks: "beer",
+      read: "book",
+      gallery: "paint-brush",
+      cafe: "coffee"
+    }
+  end
 
   private
 
@@ -138,10 +147,7 @@ class UserEventsController < CalendarsController
     @event = UserEvent.find_by(id: params[:id])
   end
 
-  def convert_to_day_of_week(cwday)
-    weekday_hash = { 1 => "Monday", 2 => "Tuesday", 3 => "Wednesday", 4=> "Thursday", 5 => "Friday", 6 => "Saturday", 7 => "Sunday"}
-    weekday_hash[cwday]
-  end
+
 
   # METHODS USED (IN ORDER) FOR THE 'generate_calendar' METHOD #
   def get_hourly_forecasts
@@ -178,23 +184,101 @@ class UserEventsController < CalendarsController
     @new_busys
   end
 
-  def get_availibilities(new_busys)
-    new_busys.sort_by!{ |busy| busy[:start] }
-
-    # group activities by date
-    new_busys_seperated = seperate_busys_by_date(new_busys)
-
-    # get availabilities for the week
-    @availibilities = availibilities(new_busys_seperated)
-
-    # add the availbilities of the days where there are no activities
-    @availibilities += free_day_availibilities(new_busys_seperated, current_user.wake_up_hour.to_i, current_user.sleep_hour.to_i)
+  def work_start_time(date_time)
+    DateTime.new(date_time.year, date_time.month, date_time.day, current_user.work_start_time.to_i, 0, 0, '-04:00')
   end
 
-  def find_optimal_availabilities(availibilities, user_event)
+  def work_end_time(date_time)
+    DateTime.new(date_time.year, date_time.month, date_time.day, current_user.work_end_time.to_i, 0, 0, '-04:00')
+  end
+
+  def work_schedule(date_time)
+    { start: work_start_time(date_time), end: work_end_time(date_time) }
+  end
+
+  def merge_busy_with_work_schedule(days_of_busies)
+    days_of_busies.each do |busies|
+      busies_for_delete = []
+      if week_days?(busies.first[:start])
+        _work_schedule = work_schedule(busies.first[:start])
+        busies.reject! { |busy| during_work_hours?(busy) }
+          if !busies.empty?
+            busies.each do |busy|
+              if end_touch_busy?(busy)
+                _work_schedule[:start] = busy[:start]
+                busies_for_delete << busy
+              elsif head_touch_busy?(busy)
+                _work_schedule[:end] = busy[:end]
+                busies_for_delete << busy
+              end
+            end
+            busies << _work_schedule
+            busies_for_delete.each { |busy| busies.delete(busy) }
+          else
+            busies << _work_schedule
+          end
+      end
+      busies.sort_by! { |busy| busy[:start] }
+    end
+    days_of_busies
+  end
+
+  def add_work_schedule_to_free_week_day(days_of_busies)
+    date_time = DateTime.now
+    i = 1
+    for i in 1..5
+      unless days_of_busies.any? { |busies| busies.first[:start].day == date_time.day }
+          if week_days?(date_time)
+            if i == 1
+              days_of_busies << [{ start: date_time, end: work_end_time(date_time) }]
+            else
+              days_of_busies << [work_schedule(date_time)]
+            end
+          end
+      end
+      i += 1
+      date_time += 1.day
+    end
+    days_of_busies.sort_by! { |busies| busies.first[:start] }
+  end
+
+
+  def during_work_hours?(availability)
+    availability[:start].hour >= current_user.work_start_time.to_i && availability[:end].hour <= current_user.work_end_time.to_i
+  end
+
+  def end_touch_busy?(availability)
+    availability[:start].hour < current_user.work_start_time.to_i&& availability[:end].hour <= current_user.work_end_time.to_i
+  end
+
+  def head_touch_busy?(availability)
+    availability[:start].hour >= current_user.work_start_time.to_i && availability[:end].hour > current_user.work_end_time.to_i
+  end
+
+  def across_busy?(availability)
+    availability[:start].hour < current_user.work_start_time.to_i&& availability[:end].hour > current_user.work_end_time.to_i
+  end
+
+  def group_availabilities(availabilities)
+    availabilities.group_by { |availability| availability[:start].day }.values
+  end
+
+  def get_availabilities(new_busys)
+    new_busys.sort_by!{ |busy| busy[:start] }
+    # group activities by date
+    new_busys_seperated = seperate_busys_by_date(new_busys)
+    new_busys_seperated = add_work_schedule_to_free_week_day(new_busys_seperated)
+    new_busys_seperated = merge_busy_with_work_schedule(new_busys_seperated)
+    # get availabilities for the week
+    @availabilities = availabilities(new_busys_seperated)
+
+    # add the availbilities of the days where there are no activities
+    @availabilities += free_day_availabilities(new_busys_seperated, current_user.wake_up_hour.to_i, current_user.sleep_hour.to_i)
+  end
+
+  def find_optimal_availabilities(availabilities, user_event)
     # find the activities that can fit within the time slots of availabilities
-    @filtered = filtered_by_duration(availibilities, user_event.duration)
-    @filtered
+    @filtered = filtered_by_duration(availabilities, user_event.duration)
   end
 
   def get_chosen_activities
@@ -206,26 +290,26 @@ class UserEventsController < CalendarsController
     endx
   end
 
-  def find_best_times_for_chosen_activities(selected_activities, new_busys, availibilities)
+  def find_best_times_for_chosen_activities(selected_activities, new_busys, availabilities)
     selected_activities.each do |user_event|
-      availibilities = get_availibilities(new_busys)
-      find_optimal_availabilities(availibilities, user_event)
-      #byebug # => @filtered
+      availabilities = get_availabilities(new_busys)
+
+      find_optimal_availabilities(availabilities, user_event)
       if @filtered.empty?
-        time_slot = recommend_longest_suitable_time_slot_from_all_availibilities(availibilities, user_event.activity)
+        time_slot = recommend_longest_suitable_time_slot_from_all_availabilities(availabilities, user_event.activity)
 
         # update the user event
         user_event.update(start_time: time_slot[:start] + 15.minutes, end_time: time_slot[:end], duration: calculate_time(time_slot) - 30, status: 1)
 
         # Add new event to busys sp that it's taken into consideration when the next event is added
-        new_busys << recommend_longest_suitable_time_slot_from_all_availibilities(availibilities, user_event.activity)
+        new_busys << recommend_longest_suitable_time_slot_from_all_availabilities(availabilities, user_event.activity)
       else
-        @interval_slot_possiblilities = all_possibilities_in_all_availibilities_interval(@filtered, user_event.duration, user_event.activity)
-        @duration_slot_possiblilities = all_possibilities_in_all_availibilities_duration(@filtered, user_event.duration, user_event.activity)
+        @interval_slot_possiblilities = all_possibilities_in_all_availabilities_interval(@filtered, user_event.duration, user_event.activity)
+        @duration_slot_possiblilities = all_possibilities_in_all_availabilities_duration(@filtered, user_event.duration, user_event.activity)
         @all_possibilities_insert_event = combine_possibilities(@interval_slot_possiblilities, @duration_slot_possiblilities)
 
         if @all_possibilities_insert_event.empty?
-          time_slot = recommend_longest_suitable_time_slot_from_all_availibilities(availibilities, user_event.activity)  unless recommend_longest_suitable_time_slot_from_all_availibilities(@availibilities, user_event.activity).nil?
+          time_slot = recommend_longest_suitable_time_slot_from_all_availabilities(availabilities, user_event.activity)  unless recommend_longest_suitable_time_slot_from_all_availabilities(@availabilities, user_event.activity).nil?
           user_event.update(duration: calculate_time(time_slot) - 30)
           user_event.update(start_time: time_slot[:start] + 15.minutes, end_time: time_slot[:end], status: 1)
         else
