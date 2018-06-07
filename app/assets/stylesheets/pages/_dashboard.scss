@@ -1,12 +1,26 @@
-.container.dashboard {
-  height: calc(100vh - 140px);
+.upcoming-events {
+  height: 100%;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  border-top: 5px solid $weada-green;
+  padding-top: 10px;
 }
 
-.btn.btn-create-schedule {
+#user-greeting {
   position: absolute;
-  top: 50px;
-  right: 20px;
+  top: 10px;
+  left: 20px;
+}
+
+.dashboard-events {
+  margin-top: 20px;
+  display: flex;
+}
+
+#weekday-col p {
+  font-weight: bold;
+  font-size: 14px;
 }
 
 .schedule-card {
@@ -23,5 +37,15 @@
   }
   p {
     font-size: 14px;
+    margin: auto;
+  }
+}
+
+.btn.btn-create-schedule {
+  width: 200px;
+  padding: 10px;
+  background-color: $weada-green;
+  a {
+    color: white;
   }
 }
