@@ -103,7 +103,19 @@ class UserEventsController < CalendarsController
     # before_action :following_five_days => @schedule_hash
     @weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     @schedule_hash.values.map { |user_events| user_events }
-    # raise
+
+    @icons = {
+      run: "heartbeat",
+      park: "leaf",
+      museum: "university",
+      bbq: "fire",
+      yoga: "align-center",
+      cinema: "film",
+      drinks: "beer",
+      read: "book",
+      gallery: "paint-brush",
+      cafe: "coffee"
+    }
   end
 
   # def destroy

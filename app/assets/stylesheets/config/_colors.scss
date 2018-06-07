@@ -11,13 +11,13 @@ $light-gray: #F4F4F4;
 
 $weada-green: #6ABBB2;
 
+$run: #FC9F5B;
 
 .run-color {
   color: #FC9F5B;
 }
 
 .park-color {
-
   color: #8ACB88;
 }
 
@@ -49,9 +49,47 @@ $weada-green: #6ABBB2;
   color: #F3DE8A;
 }
 
+
+
 // .cafe-color {
 //   color: #C6A5C2;
 // }
+
+.run-bd-color {
+ border-left-color: #FC9F5B !important;
+}
+
+.park-bd-color {
+ border-left-color: #8ACB88 !important;
+}
+
+.museum-bd-color {
+ border-left-color: #5B9279 !important;
+}
+
+.bbq-bd-color {
+ border-left-color: #56A3A6 !important;
+}
+
+.yoga-bd-color {
+ border-left-color: #C6A5C2 !important;
+}
+
+.cinema-bd-color {
+ border-left-color: #81D2C7 !important;
+}
+
+.drinks-bd-color {
+ border-left-color: #86BBD8 !important;
+}
+
+.read-bd-color {
+ border-left-color: #93F2C6 !important;
+}
+
+.gallery-bd-color {
+ border-left-color: #F3DE8A !important;
+}
 
 
 
