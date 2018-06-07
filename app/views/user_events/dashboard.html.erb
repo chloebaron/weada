@@ -3,29 +3,41 @@
     <h4>Hello, <%= current_user.first_name %></h4>
   </div>
   <div class="btn btn-create-schedule">
-    <%= link_to "Create Schedule!", activities_path %>
+    <%= link_to "Create Schedule", activities_path %>
   </div>
   <div class="events-title">
       <h4>Upcoming Events</h4>
   </div>
+
   <div class="row dashboard-events">
     <% @schedule_hash.keys.each do |weekday|  %>
+    <!-- Outer div of column. Need to put title here OR just above -->
       <div class="col-xs-3 col-md-3 weekday-col">
-        <% if @schedule_hash[weekday] != "" && !@schedule_hash[weekday].nil?%>
-          <p><%= weekday %></p>
-          <% @schedule_hash[weekday].each do |activity| %>
-            <div class="card schedule-card";>
-              <div class="event-name">
-                <p><%= activity.activity.description %></p>
-              </div>
-              <div class="event-time">
-                <p>
-                  <%= activity.start_time.in_time_zone(@time_zone).strftime("%l %M%p") %> - <%= activity.end_time.in_time_zone(@time_zone).strftime("%l %M%p") %>
-                </p>
-              </div>
-            </div>
-          <% end %>
-        <% end %>
+        <!-- Outer div of content -->
+        <div class="weekday-content">
+          <!-- space on the left with border -->
+          <div class="column-spacer">
+          </div>
+          <!-- column content -->
+          <div class="column-day">
+            <% if @schedule_hash[weekday] != "" && !@schedule_hash[weekday].nil?%>
+              <p><%= weekday %></p>
+              <% @schedule_hash[weekday].each do |activity| %>
+                <div class="card schedule-card";>
+                  <!-- input card icon, activity-color, and weather icon if time -->
+                  <div class="event-name">
+                    <p><%= activity.activity.description %></p>
+                  </div>
+                  <div class="event-time">
+                    <p>
+                      <%= activity.start_time.in_time_zone(@time_zone).strftime("%l %M%p") %> - <%= activity.end_time.in_time_zone(@time_zone).strftime("%l %M%p") %>
+                    </p>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
       </div>
     <% end %>
   </div>
