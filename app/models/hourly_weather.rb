@@ -4,7 +4,7 @@ class HourlyWeather < ApplicationRecord
   end
 
   def dry?
-    precip_probability <= 0.20 && temperature > 0
+    precip_probability <= 0.20 && temperature > 32.0
   end
 
   def calm?
@@ -12,6 +12,6 @@ class HourlyWeather < ApplicationRecord
   end
 
   def warm?
-    apparent_temperature >= 15.0
+    apparent_temperature >= 60.0
   end
 end

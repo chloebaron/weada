@@ -115,7 +115,6 @@ class CalendarsController < ApplicationController
   end
 
   def wakeup_time(date)
-    wake_time = current_user.wake_up_hour.to_datetime
     DateTime.new(date.year, date.month, date.day, current_user.wake_up_hour.to_i, 0, 0, '-04:00')
   end
 

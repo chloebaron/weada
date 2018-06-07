@@ -22,7 +22,6 @@ class UserEventsController < CalendarsController
     redirect_to generate_calendar_path
   end
 
-
   # METHODS USED ARE PRIVATE #
   def generate_calendar
     require 'google/apis/calendar_v3'
@@ -40,7 +39,7 @@ class UserEventsController < CalendarsController
     @service.authorization = secrets.to_authorization
     @service.authorization.refresh!
 
-    get_hourly_forecasts if HourlyWeather.all.empty? # => fills database with forecasts if data base is empty
+    get_hourly_forecasts  # => fills database with forecasts if data base is empty
 
     # get_client_session # => @client
     # get_service_methods() # => @service
@@ -121,7 +120,7 @@ class UserEventsController < CalendarsController
 
   private
 
-  def following_five_days # => for displaying events
+  def following_five_days
     five_days_user_events = UserEvent.where("user_id = ? AND start_time >= ? AND start_time <= ?",
       current_user.id,
       DateTime.now,
@@ -150,6 +149,7 @@ class UserEventsController < CalendarsController
 
 
   # METHODS USED (IN ORDER) FOR THE 'generate_calendar' METHOD #
+
   def get_hourly_forecasts
     HourlyWeather.destroy_all
 
@@ -287,7 +287,7 @@ class UserEventsController < CalendarsController
     # @selected_activities = [UserEvent.create(user: current_user, activity: Activity.first, duration: 60)]
     @selected_activities.each do |user_event|
       user_event.update duration: user_event.duration + 30
-    endx
+    end
   end
 
   def find_best_times_for_chosen_activities(selected_activities, new_busys, availabilities)
@@ -300,7 +300,7 @@ class UserEventsController < CalendarsController
 
         # update the user event
         user_event.update(start_time: time_slot[:start] + 15.minutes, end_time: time_slot[:end], duration: calculate_time(time_slot) - 30, status: 1)
-
+        user_event.update(weather_condition: event_weathers({ start: user_event.start_time.to_datetime, end: user_event.end_time.to_datetime }).first.summary)
         # Add new event to busys sp that it's taken into consideration when the next event is added
         new_busys << recommend_longest_suitable_time_slot_from_all_availabilities(availabilities, user_event.activity)
       else
@@ -312,10 +312,12 @@ class UserEventsController < CalendarsController
           time_slot = recommend_longest_suitable_time_slot_from_all_availabilities(availabilities, user_event.activity)  unless recommend_longest_suitable_time_slot_from_all_availabilities(@availabilities, user_event.activity).nil?
           user_event.update(duration: calculate_time(time_slot) - 30)
           user_event.update(start_time: time_slot[:start] + 15.minutes, end_time: time_slot[:end], status: 1)
+          user_event.update(weather_condition: event_weathers({ start: user_event.start_time.to_datetime, end: user_event.end_time.to_datetime }).first.summary)
         else
           time_slot = @all_possibilities_insert_event.sample
           user_event.update(duration: calculate_time(time_slot) - 30)
           user_event.update(start_time: time_slot[:start] + 15.minutes, end_time: time_slot[:end], status: 1)
+          user_event.update(weather_condition: event_weathers({ start: user_event.start_time.to_datetime, end: user_event.end_time.to_datetime }).first.summary)
         end
 
         # Add new event to busys sp that it's taken into consideration when the next event is added
