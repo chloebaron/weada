@@ -34,7 +34,7 @@
                 <i class="fa fa-<%= @icons[activity.name.to_sym] %> <%= activity.name %>-color  fa-lg"></i>
               </div>
               <div class="duration-select">
-              <%= select(:user_events, activity.id, [['30', 30], ['60', 60], ['90', 90], ['120', 120]], include_blank: true) %>
+              <%= select(:user_events, activity.id, [['30 min', 30], ['1 hr', 60], ['1.5 hrs', 90], ['2 hrs', 120], ['2.5 hrs', 150], ['3 hrs', 180]], include_blank: true) %>
               </div>
             </div>
         <% end %>
