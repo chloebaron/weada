@@ -24,6 +24,7 @@
   <div id="sidebar">
     <%= form_tag('/user_events', {:method => :post, :class => 'form-design' }) do %>
       <div class="selected-activities-container">
+        <h4>Choose a duration for each activity</h4>
         <% @activities.each do |activity| %>
             <div class="card hidden activity-wrapper-<%= activity.id %>"
               <input type="checkbox" name="activity_ids[]" id="<%= activity.id %>" value="<%= activity.id %>" class="hidden">
