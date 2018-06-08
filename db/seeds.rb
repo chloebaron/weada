@@ -18,7 +18,7 @@ User.create!(
   password: "testing",
   first_name: "john",
   last_name: "johnson",
-  address: " yo mama" #.strip.gsub(/\s+/, " ").gsub(/(\(|\)|\#)/, "").unicode_normalize(:nfkd).encode('ASCII', replace: '')
+  address: "6586 av de chateaubriand" #.strip.gsub(/\s+/, " ").gsub(/(\(|\)|\#)/, "").unicode_normalize(:nfkd).encode('ASCII', replace: '')
   )
 
 {
@@ -32,7 +32,7 @@ User.create!(
   },
   "park" => {
     name: "park",
-    description: "Time in the Park",
+    description: "Spend Time in the Park",
     sunny_required: true,
     warm_required: true,
     dry_required: true,
@@ -88,7 +88,7 @@ User.create!(
   },
   "gallery" => {
     name: "gallery",
-    description: "Go to an Art Gallery",
+    description: "Check out an Art Gallery",
     sunny_required: false,
     warm_required: false,
     dry_required: false,
