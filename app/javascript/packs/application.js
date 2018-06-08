@@ -6,6 +6,14 @@ const options = {
 
 }
 
+// Alert removal after 3 seconds
+$(document).ready(function() {
+  setTimeout(function() {
+    $('.alert').slideUp()
+  }, 3000)
+})
+
+// Time picker for registration
 $("#wake_up_hour").timepicker();
 $("#sleep_hour").timepicker();
 $("#start_time").timepicker();
