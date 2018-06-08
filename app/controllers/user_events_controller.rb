@@ -307,6 +307,8 @@ class UserEventsController < CalendarsController
   end
 
   def find_best_times_for_chosen_activities(selected_activities, new_busys, availabilities)
+    srand(ENV["SEED"])
+
     selected_activities.each do |user_event|
       availabilities = get_availabilities(new_busys)
 

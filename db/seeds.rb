@@ -1,8 +1,9 @@
 # User.create(email: "admin@admin.com", password: "testing", admin: true)
 # User.create(email: "user@user.com", password: "testing")
+UserEvent.destroy_all
 Activity.destroy_all
 User.destroy_all
-UserEvent.destroy_all
+
 
 
 User.create!(
