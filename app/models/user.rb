@@ -18,7 +18,7 @@ class User < ApplicationRecord
         email: data['email'],
         first_name: data['first_name'],
         last_name: data['last_name'],
-        wake_up_hour: sleep_schedule["wakep er b_up_hour"],
+        wake_up_hour: sleep_schedule["wake_up_hour"],
         sleep_hour: sleep_schedule["sleep_hour"],
         work_start_time: sleep_schedule["start_time"],
         work_end_time: sleep_schedule["end_time"],
