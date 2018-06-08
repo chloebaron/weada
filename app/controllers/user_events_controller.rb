@@ -17,10 +17,8 @@ class UserEventsController < CalendarsController
       end
     end
 
-
     redirect_to generate_calendar_path
   end
-
 
   # METHODS USED ARE PRIVATE #
   def generate_calendar
@@ -39,7 +37,7 @@ class UserEventsController < CalendarsController
     @service.authorization = secrets.to_authorization
     @service.authorization.refresh!
 
-    get_hourly_forecasts if HourlyWeather.all.empty? # => fills database with forecasts if data base is empty
+    get_hourly_forecasts  # => fills database with forecasts if data base is empty
 
     # get_client_session # => @client
     # get_service_methods() # => @service
@@ -122,7 +120,7 @@ class UserEventsController < CalendarsController
 
   private
 
-  def following_five_days # => for displaying events
+  def following_five_days
     five_days_user_events = UserEvent.where("user_id = ? AND start_time >= ? AND start_time <= ?",
       current_user.id,
       DateTime.now,
@@ -152,13 +150,14 @@ class UserEventsController < CalendarsController
 
 
   # METHODS USED (IN ORDER) FOR THE 'generate_calendar' METHOD #
+
   def get_hourly_forecasts
     HourlyWeather.destroy_all
 
     weather_url = "https://api.darksky.net/forecast/#{ENV["DARKSKY_API_LEO"]}/45.516136,-73.656830?extend=hourly&exclude=daily,minutely"
     weather_json = open(weather_url).read
     weather = JSON.parse(weather_json)
-    next_120_hours = weather["hourly"]["data"].slice(0..119)
+    next_120_hours = weather["hourly"]["data"].slice(0..144)
 
     next_120_hours.each do |weather_condition|
       HourlyWeather.create!(
@@ -244,7 +243,9 @@ class UserEventsController < CalendarsController
       unless days_of_busies.any? { |busies| busies.first[:start].day == date_time.day }
         if week_days?(date_time)
           if i == 1
-            days_of_busies << [{ start: date_time, end: work_end_time(date_time) }]
+            if date_time < work_end_time(date_time)
+              days_of_busies << [{ start: date_time, end: work_end_time(date_time) }]
+            end
           else
             days_of_busies << [work_schedule(date_time)]
           end
@@ -258,19 +259,19 @@ class UserEventsController < CalendarsController
 
 
   def during_work_hours?(availability)
-    availability[:start].hour >= current_user.work_start_time.to_i && availability[:end].hour <= current_user.work_end_time.to_i
+    availability[:start].hour >= current_user.work_start_time.to_time.hour && availability[:end].hour <= current_user.work_end_time.to_time.hour
   end
 
   def end_touch_busy?(availability)
-    availability[:start].hour < current_user.work_start_time.to_i&& availability[:end].hour <= current_user.work_end_time.to_i
+    availability[:start].hour < current_user.work_start_time.to_time.hour&& availability[:end].hour <= current_user.work_end_time.to_time.hour
   end
 
   def head_touch_busy?(availability)
-    availability[:start].hour >= current_user.work_start_time.to_i && availability[:end].hour > current_user.work_end_time.to_i
+    availability[:start].hour >= current_user.work_start_time.to_time.hour && availability[:end].hour > current_user.work_end_time.to_time.hour
   end
 
   def across_busy?(availability)
-    availability[:start].hour < current_user.work_start_time.to_i&& availability[:end].hour > current_user.work_end_time.to_i
+    availability[:start].hour < current_user.work_start_time.to_time.hour&& availability[:end].hour > current_user.work_end_time.to_time.hour
   end
 
   def group_availabilities(availabilities)
@@ -314,7 +315,7 @@ class UserEventsController < CalendarsController
 
         # update the user event
         user_event.update(start_time: time_slot[:start] + 15.minutes, end_time: time_slot[:end], duration: calculate_time(time_slot) - 30, status: 1)
-
+        user_event.update(weather_condition: event_weathers({ start: user_event.start_time.to_datetime, end: user_event.end_time.to_datetime }).first.summary)
         # Add new event to busys sp that it's taken into consideration when the next event is added
         new_busys << recommend_longest_suitable_time_slot_from_all_availabilities(availabilities, user_event.activity)
       else
@@ -326,10 +327,12 @@ class UserEventsController < CalendarsController
           time_slot = recommend_longest_suitable_time_slot_from_all_availabilities(availabilities, user_event.activity) unless recommend_longest_suitable_time_slot_from_all_availabilities(@availabilities, user_event.activity).nil?
           user_event.update(duration: calculate_time(time_slot) - 30)
           user_event.update(start_time: time_slot[:start] + 15.minutes, end_time: time_slot[:end], status: 1)
+          user_event.update(weather_condition: event_weathers({ start: user_event.start_time.to_datetime, end: user_event.end_time.to_datetime }).first.summary)
         else
           time_slot = @all_possibilities_insert_event.sample
           user_event.update(duration: calculate_time(time_slot) - 30)
           user_event.update(start_time: time_slot[:start] + 15.minutes, end_time: time_slot[:end], status: 1)
+          user_event.update(weather_condition: event_weathers({ start: user_event.start_time.to_datetime, end: user_event.end_time.to_datetime }).first.summary)
         end
 
         # Add new event to busys sp that it's taken into consideration when the next event is added

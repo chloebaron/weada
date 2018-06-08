@@ -3,10 +3,14 @@
     <%= link_to dashboard_path do %>
       <i class="fa fa-bolt" aria-hidden="true"></i>
     <% end %>
+
     <%= link_to activities_path do %>
       <i class="fa fa-cloud" aria-hidden="true"></i>
     <% end %>
-    <a href="#"><i class="fa fa-thermometer-half"></i></a>
+
+    <%= link_to omniauth_authorize_path(:user, :google_oauth2) do %>
+      <i class="fa fa-calendar"></i>
+    <% end %>
 <!--<a href="#"><i class="fa fa-cloud"></i></a>
     <a href="#"><i class="fa fa-github"></i></a>
     <a href="#"><i class="fa fa-facebook"></i></a> -->

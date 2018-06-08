@@ -1,4 +1,3 @@
-
 <div class="container upcoming-events">
   <div class="user-greeting">
     <h2>Hello, <%= current_user.first_name %></h2>
@@ -7,7 +6,7 @@
     <%= link_to "Create Schedule", activities_path %>
   </div>
   <div class="events-title">
-      <h3>Upcoming Events</h3>
+      <h4>My Next 5 Days of Events</h4>
   </div>
 
   <div class="row dashboard-events">
@@ -41,6 +40,7 @@
                       <p>
                         <%= event.start_time.in_time_zone(@time_zone).strftime("%l %M%p") %> - <%= event.end_time.in_time_zone(@time_zone).strftime("%l %M%p") %>
                       </p>
+                      <p><%= event.weather_condition %></p>
                     </div>
                   </div>
                 </div>
