@@ -124,7 +124,7 @@ class UserEventsController < CalendarsController
     five_days_user_events = UserEvent.where("user_id = ? AND start_time >= ? AND start_time <= ?",
       current_user.id,
       DateTime.now,
-      DateTime.now + 4.day
+      DateTime.now + 4.day + 6.hour
       )
     five_days_user_events = five_days_user_events.group_by { |user_event| user_event.start_time.day }.values
     five_days_user_events.sort_by! { |user_events| user_events.first.start_time }
