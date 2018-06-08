@@ -1,23 +1,25 @@
 <div class="activities-wrapper wrapper">
   <div class="card-container">
+    <div class="card-wrapper">
       <h3>1. Choose your activities for the week!</h3>
       <div class="row">
         <% @activities.each do |activity| %>
-        <div class="col-xs-12 col-sm-6 col-md-4">
-         <div class="<%= activity.id %>" onclick="handleEvent(event, this)">
-          <div class="card option-<%= activity.id %> activity">
-            <div class="icon">
-              <!-- To use with svg file dynamically with activity names -->
-              <!-- <span class="<%# activity.name %>-fill"><%# inline_svg(activity.name) %></span>  -->
-              <i class="fa fa-<%= @icons[activity.name.to_sym] %> <%= activity.name %>-color  fa-lg"></i>
-            </div>
-            <div class="activity-card-name <%= activity.name %>-color">
-              <%= activity.description %>
+          <div class="col-xs-12 col-sm-6 col-md-4">
+            <div class="<%= activity.id %>" onclick="handleEvent(event, this)">
+              <div class="card option-<%= activity.id %> activity">
+                <div class="icon">
+                  <!-- To use with svg file dynamically with activity names -->
+                  <!-- <span class="<%# activity.name %>-fill"><%# inline_svg(activity.name) %></span>  -->
+                  <i class="fa fa-<%= @icons[activity.name.to_sym] %> <%= activity.name %>-color  fa-lg"></i>
+                </div>
+                <div class="activity-card-name <%= activity.name %>-color">
+                  <%= activity.description %>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        <% end %>
       </div>
-      <% end %>
     </div>
   </div>
 
@@ -25,9 +27,6 @@
     <%= form_tag('/user_events', {:method => :post, :class => 'form-design', :id =>"create-schedule"  }) do %>
       <div class="selected-activities-container">
         <h4>2. Choose a duration for each activity</h4>
-        <div class="card placeholder">
-          <p>Your activities will appear here</p>
-        </div>
         <% @activities.each do |activity| %>
             <div class="card hidden activity-wrapper-<%= activity.id %>"
               <input type="checkbox" name="activity_ids[]" id="<%= activity.id %>" value="<%= activity.id %>" class="hidden">
@@ -39,6 +38,9 @@
               </div>
             </div>
         <% end %>
+        <div class="card placeholder">
+          <p>Your activities will appear here</p>
+        </div>
         <div class="btn btn-save"><%= submit_tag 'Create Schedule'%></i> </div>
       </div>
     <% end %>

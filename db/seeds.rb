@@ -32,7 +32,7 @@ User.create!(
   },
   "park" => {
     name: "park",
-    description: "Spend Time in the Park",
+    description: "Time in the Park",
     sunny_required: true,
     warm_required: true,
     dry_required: true,
@@ -88,7 +88,7 @@ User.create!(
   },
   "gallery" => {
     name: "gallery",
-    description: "Check out an Art Gallery",
+    description: "Go to an Art Gallery",
     sunny_required: false,
     warm_required: false,
     dry_required: false,
