@@ -235,7 +235,9 @@ class UserEventsController < CalendarsController
       unless days_of_busies.any? { |busies| busies.first[:start].day == date_time.day }
         if week_days?(date_time)
           if i == 1
-            days_of_busies << [{ start: date_time, end: work_end_time(date_time) }]
+            if date_time < work_end_time(date_time)
+              days_of_busies << [{ start: date_time, end: work_end_time(date_time) }]
+            end
           else
             days_of_busies << [work_schedule(date_time)]
           end
@@ -249,19 +251,19 @@ class UserEventsController < CalendarsController
 
 
   def during_work_hours?(availability)
-    availability[:start].hour >= current_user.work_start_time.to_i && availability[:end].hour <= current_user.work_end_time.to_i
+    availability[:start].hour >= current_user.work_start_time.to_time.hour && availability[:end].hour <= current_user.work_end_time.to_time.hour
   end
 
   def end_touch_busy?(availability)
-    availability[:start].hour < current_user.work_start_time.to_i&& availability[:end].hour <= current_user.work_end_time.to_i
+    availability[:start].hour < current_user.work_start_time.to_time.hour&& availability[:end].hour <= current_user.work_end_time.to_time.hour
   end
 
   def head_touch_busy?(availability)
-    availability[:start].hour >= current_user.work_start_time.to_i && availability[:end].hour > current_user.work_end_time.to_i
+    availability[:start].hour >= current_user.work_start_time.to_time.hour && availability[:end].hour > current_user.work_end_time.to_time.hour
   end
 
   def across_busy?(availability)
-    availability[:start].hour < current_user.work_start_time.to_i&& availability[:end].hour > current_user.work_end_time.to_i
+    availability[:start].hour < current_user.work_start_time.to_time.hour&& availability[:end].hour > current_user.work_end_time.to_time.hour
   end
 
   def group_availabilities(availabilities)

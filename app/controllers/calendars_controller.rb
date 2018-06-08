@@ -461,10 +461,6 @@ class CalendarsController < ApplicationController
     @service.query_freebusy(free_busy_request)
   end
 
-  def natural(user_events)
-
-  end
-
   # def client_options
   #   {
   #     client_id: ENV["GOOGLE_CALENDAR_CLIENT_ID"],
