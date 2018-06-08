@@ -19,7 +19,7 @@
 .card {
   height: 90px;
   font-weight: bolder;
-  background-color: rgba(255,255,255, 0.7);
+  background-color: rgba(255,255,255, 0.9);
   position: relative;
   margin: 10px;
   text-align: center;
@@ -57,6 +57,17 @@
   }
 }
 
+.card.placeholder {
+  border: dashed 2px rgba(255,255,255, 0.5);
+  background-color: transparent;
+  // position: fixed;
+  // width: 150px;
+  p {
+    color: rgba(255,255,255, 0.5);
+    font-weight: lighter;
+  }
+}
+
 #activity_ids_ {
   position: absolute;
   top: 10px;
@@ -73,24 +84,6 @@
   width: 100%;
   font-weight: lighter;
   font-size: 16px;
-}
-
-// .card-link {
-//   position: absolute;
-//   top: 0;
-//   bottom: 0;
-//   right: 0;
-//   width: 100%;
-//   z-index: 2;
-//   background: black;
-//   opacity: 0;
-// }
-// .card-link &:hover {
-//   opacity: 0.1;
-// }
-
-.h1 {
-  font-size: 48;
 }
 
 
