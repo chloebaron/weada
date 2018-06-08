@@ -128,6 +128,7 @@ class UserEventsController < CalendarsController
       )
     five_days_user_events = five_days_user_events.group_by { |user_event| user_event.start_time.day }.values
     five_days_user_events.sort_by! { |user_events| user_events.first.start_time }
+    five_days_user_events.each { |user_events| user_events.sort_by! { |user_event| user_event.start_time } }
     @schedule_hash = {}
     for i in 0..4
       correspond_day_user_events = five_days_user_events.find{ |user_events| user_events.first.start_time.day == (DateTime.now + i.day).day }
