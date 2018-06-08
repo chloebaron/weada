@@ -27,7 +27,12 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
     elsif @user.persisted?
       flash[:notice] = I18n.t 'devise.omniauth_callbacks.success', kind: 'Google'
       sign_in @user, event: :authentication
-      redirect_to activities_url
+      # raise
+      if current_user.user_events.empty?
+        redirect_to activities_url
+      else
+        redirect_to dashboard_url
+      end
     else
       session['devise.google_data'] = request.env['omniauth.auth'].except(:extra) # Removing extra as it can overflow some session stores
       redirect_to new_user_registration_url, alert: @user.errors.full_messages.join("\n")

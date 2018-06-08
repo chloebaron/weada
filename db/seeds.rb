@@ -18,7 +18,7 @@ User.create!(
   password: "testing",
   first_name: "john",
   last_name: "johnson",
-  address: " yo mama" #.strip.gsub(/\s+/, " ").gsub(/(\(|\)|\#)/, "").unicode_normalize(:nfkd).encode('ASCII', replace: '')
+  address: "6586 av de chateaubriand" #.strip.gsub(/\s+/, " ").gsub(/(\(|\)|\#)/, "").unicode_normalize(:nfkd).encode('ASCII', replace: '')
   )
 
 {

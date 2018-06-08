@@ -1,9 +1,7 @@
 .loading-message{
-  margin-top: 30%;
   color: #fff;
   font-weight: bold;
 }
-
 
 #loadingDiv {
    width: 100%;
@@ -11,18 +9,20 @@
    top: 0;
    left: 0;
    position: fixed;
-   display: block;
+   display: flex;
    opacity: 0.7;
    background-color: $weada-green;
    z-index: 99;
    text-align: center;
+   align-items: center;
+   justify-content: space-around;
 }
 
 .sk-folding-cube {
   margin: 20px auto;
   width: 40px;
   height: 40px;
-  margin-top: 8%;
+  top: 0;
   position: relative;
   -webkit-transform: rotateZ(45deg);
           transform: rotateZ(45deg);

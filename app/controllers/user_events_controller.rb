@@ -97,7 +97,7 @@ class UserEventsController < CalendarsController
 
   def dashboard
     @time_zone = ActiveSupport::TimeZone.new("Eastern Time (US & Canada)")
-
+    # @abbrev_days = I18n.t('date.abbr_day_names')
     # before_action :following_five_days => @schedule_hash
     @weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     @today = @weekdays[DateTime.now.wday - 1]

@@ -12,3 +12,68 @@
   overflow-y: scroll;
 }
 
+.duration-select {
+  select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-appearance: none;
+    appearance: none;
+    outline: 0;
+    box-shadow: none;
+    border: 0 !important;
+    background: $weada-green;
+    background-image: none;
+  }
+}
+
+/* Custom Select */
+.duration-select {
+  position: relative;
+  display: block;
+  width: 6em;
+  height: 50px;
+  line-height: 3;
+  background: $weada-green;
+  overflow: hidden;
+  border-radius: .25em;
+}
+
+.duration-select {
+  select {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0 0 0 .5em;
+    color: #fff;
+    cursor: pointer;
+  }
+  color: white;
+}
+
+.duration-select {
+  select::-ms-expand {
+    display: none;
+  }
+}
+
+/* Arrow */
+.duration-select::after {
+  content: '\25BC';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0 1em;
+  background: transparent;
+  pointer-events: none;
+}
+/* Transition */
+.duration-select:hover::after {
+  color: rgba(255, 255, 255, 0.9);
+}
+.duration-select::after {
+  -webkit-transition: .25s all ease;
+  -o-transition: .25s all ease;
+  transition: .25s all ease;
+}
+

@@ -2,22 +2,25 @@
   <div class="user-greeting">
     <h2>Hello, <%= current_user.first_name %></h2>
   </div>
-  <div class="btn btn-create-schedule">
-    <%= link_to "Create Schedule", activities_path %>
-  </div>
-  <div class="events-title">
-      <h4>My Next 5 Days of Events</h4>
+  <div class="row">
+     <div class="btn btn-schedule">
+    <%= link_to "Add to Schedule", activities_path %>
+    </div>
+    <div class="btn btn-schedule">
+    <%= link_to "My Google Calendar", "https://calendar.google.com/calendar/r", target: "_blank" %>
+    </div>
   </div>
 
-  <div class="row dashboard-events">
+  <div class="events-title">
+      <h4>Your Next 5 Days of Events</h4>
+  </div>
+
+  <div class="dashboard-events">
     <% @schedule_hash.keys.each do |weekday| %>
     <!-- Outer div of column. Need to put title here OR just above -->
-      <div class="col-xs-3 col-md-3 weekday-col">
+      <div class="weekday-col">
         <!-- Outer div of content -->
         <div class="weekday-content">
-          <!-- space on the left with border -->
-          <div class="column-spacer">
-          </div>
           <!-- column content -->
           <div class="column-day">
             <% if @today == weekday %>
@@ -40,21 +43,27 @@
                       <p>
                         <%= event.start_time.in_time_zone(@time_zone).strftime("%l:%M%p") %> - <%= event.end_time.in_time_zone(@time_zone).strftime("%l:%M%p") %>
                       </p>
-                      <p><%= event.weather_condition %></p>
+                      <p>Weather is looking:<br><%= event.weather_condition %></p>
                     </div>
                   </div>
                 </div>
               <% end %>
+            <% else %>
+                <div class="card schedule-card";>
+                  <div class="dashboard-icon ">
+                    <i class="fa fa-frown fa-lg"></i>
+                  </div>
+                  <div>
+                    <div class="no-event">
+                      <h4>No Weada events today</h4>
+                    </div>
+                  </div>
+                </div>
             <% end %>
           </div>
         </div>
       </div>
     <% end %>
-  </div>
-  <div class="row">
-    <div class="col-xs-4 col-sm-4 col-md-4 col-md-offset-4">
-      <%= link_to "My Google Calendar", "https://calendar.google.com/calendar/r", class: "btn btn-success" %>
-    </div>
   </div>
 </div>
 
