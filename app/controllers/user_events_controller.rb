@@ -188,14 +188,22 @@ class UserEventsController < CalendarsController
 
   def work_start_time(date_time)
     user_time = current_user.work_start_time.to_datetime
-    minutes = user_time.minute.to_s.split("").map { |number| number.to_i }
-    DateTime.new(date_time.year, date_time.month, date_time.day, user_time.hour, minutes[0], 0, '-04:00')
+    if user_time.nil?
+      DateTime.new(date_time.year, date_time.month, date_time.day, 12, 0, 0, '-04:00')
+    else
+      minutes = user_time.minute.to_s.split("").map { |number| number.to_i }
+      DateTime.new(date_time.year, date_time.month, date_time.day, user_time.hour, minutes[0], 0, '-04:00')
+    end
   end
 
   def work_end_time(date_time)
     user_time = current_user.work_end_time.to_datetime
-    minutes = user_time.minute.to_s.split("").map { |number| number.to_i }
-    DateTime.new(date_time.year, date_time.month, date_time.day, user_time.hour, minutes[0], 0, '-04:00')
+     if user_time.nil?
+      DateTime.new(date_time.year, date_time.month, date_time.day, 18, 0, 0, '-04:00')
+    else
+      minutes = user_time.minute.to_s.split("").map { |number| number.to_i }
+      DateTime.new(date_time.year, date_time.month, date_time.day, user_time.hour, minutes[0], 0, '-04:00')
+    end
   end
 
   def work_schedule(date_time)

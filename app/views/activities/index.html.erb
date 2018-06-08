@@ -22,7 +22,7 @@
   </div>
 
   <div id="sidebar">
-    <%= form_tag('/user_events', {:method => :post, :class => 'form-design' }) do %>
+    <%= form_tag('/user_events', {:method => :post, :class => 'form-design', :id =>"create-schedule"  }) do %>
       <div class="selected-activities-container">
         <% @activities.each do |activity| %>
             <div class="card hidden activity-wrapper-<%= activity.id %>"

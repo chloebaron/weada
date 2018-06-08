@@ -32,4 +32,7 @@
     <%= javascript_pack_tag 'application' %>
     <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/brands.js" integrity="sha384-G/XjSSGjG98ANkPn82CYar6ZFqo7iCeZwVZIbNWhAmvCF2l+9b5S21K4udM7TGNu" crossorigin="anonymous"></script>
   </body>
+  <% if action_name == "index" %>
+    <%= render 'shared/loader' %>
+  <% end %>
 </html>
