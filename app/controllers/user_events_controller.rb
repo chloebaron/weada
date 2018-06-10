@@ -198,7 +198,7 @@ class UserEventsController < CalendarsController
 
   def work_end_time(date_time)
     user_time = current_user.work_end_time.to_datetime
-     if user_time.nil?
+    if user_time.nil?
       DateTime.new(date_time.year, date_time.month, date_time.day, 18, 0, 0, '-04:00')
     else
       minutes = user_time.minute.to_s.split("").map { |number| number.to_i }
@@ -306,6 +306,24 @@ class UserEventsController < CalendarsController
     end
   end
 
+  def optimize_time_slot_to_place_events(availabilites, user_event)
+    activity = user_event.activity
+    case activity.name
+    when "park"
+      filter_by_hour(availabilites, 18)|| availabilites
+    when "museum", "gallery"
+      filter_by_hour(availabilites, 20) || availabilities
+    when "drinks"
+      availabilites.select { |availability| availability[:start].hour >= 17 } || availabilites
+    else
+      availabilites
+    end
+  end
+
+  def filter_by_hour(availbilities, hour)
+    availbilities.select { |availability| availability[:end].hour <= hour }
+  end
+
   def find_best_times_for_chosen_activities(selected_activities, new_busys, availabilities)
     srand(ENV["SEED"].to_i)
 
@@ -332,7 +350,7 @@ class UserEventsController < CalendarsController
           user_event.update(start_time: time_slot[:start] + 15.minutes, end_time: time_slot[:end], status: 1)
           user_event.update(weather_condition: event_weathers({ start: user_event.start_time.to_datetime, end: user_event.end_time.to_datetime }).first.summary)
         else
-          time_slot = @all_possibilities_insert_event.sample
+          time_slot = optimize_time_slot_to_place_events(@all_possibilities_insert_event, user_event).sample
           user_event.update(duration: calculate_time(time_slot) - 30)
           user_event.update(start_time: time_slot[:start] + 15.minutes, end_time: time_slot[:end], status: 1)
           user_event.update(weather_condition: event_weathers({ start: user_event.start_time.to_datetime, end: user_event.end_time.to_datetime }).first.summary)

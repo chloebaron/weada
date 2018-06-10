@@ -339,7 +339,8 @@ class CalendarsController < ApplicationController
   end
 
   def combine_possibilities(interval, duration)
-    (interval + duration).uniq.sort_by! { |event| event[:start] } # e => hash
+    @combined_possibilities = (interval + duration).uniq.sort_by! { |event| event[:start] } # e => hash
+    @combined_possibilities.select { |event| !week_days?(event[:start])  } || @combined_possibilities
   end
 
   # Doesn't take weather into account

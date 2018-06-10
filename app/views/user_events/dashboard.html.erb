@@ -41,7 +41,7 @@
                     </div>
                     <div class="event-time">
                       <p>
-                        <%= event.start_time.in_time_zone(@time_zone).strftime("%l %M%p") %> - <%= event.end_time.in_time_zone(@time_zone).strftime("%l %M%p") %>
+                        <%= event.start_time.in_time_zone(@time_zone).strftime("%l:%M%p") %> - <%= event.end_time.in_time_zone(@time_zone).strftime("%l:%M%p") %>
                       </p>
                       <p>Weather is looking:<br><%= event.weather_condition %></p>
                     </div>
